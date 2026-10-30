@@ -33,4 +33,4 @@ benchmark:
   metric_protocol: "mae per 1 mm bin; worst_bin = max over 2-9 mm; acc10 at 10 mm"
 
 created: "2026-10-30"
-dlef_commit: "937f11e"
+dlef_commit: "8b13259"
