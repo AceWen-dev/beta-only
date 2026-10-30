@@ -209,7 +209,7 @@ def main() -> int:
         for suffix, test_set in BENCHMARKS:
             eval_experiment = f"{experiment}-eval"
             before_eval = ids_for(eval_experiment)
-            args = [
+            eval_args = [
                 sys.executable,
                 "core/commands/eval.py",
                 "--checkpoint",
@@ -220,9 +220,9 @@ def main() -> int:
                 str(BENCHMARK_ROOT / f"v11-{suffix}{BENCHMARK_SUFFIX}.json"),
             ]
             if test_set is not None:
-                args.extend(["--set", f"data.test_set={test_set}"])
+                eval_args.extend(["--set", f"data.test_set={test_set}"])
             run_command(
-                args,
+                eval_args,
                 REPORT_ROOT / f"rerun_{STAMP}_{experiment}_{suffix}_eval.log",
             )
             eval_run = new_run(eval_experiment, before_eval)

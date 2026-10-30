@@ -2,11 +2,11 @@
 
 ---
 project: "beta-regression"
-phase: data             # setup | data | baseline | ablation | benchmark | report
+phase: ablation         # setup | data | baseline | ablation | benchmark | report
 updated: "2026-10-30"
 owner: twj
 primary_metric: "v11"
-best_run: "-"
+best_run: "20261030-173919_94be0f9b_s20261020_f5ea0c"
 benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018147"
 ---
 
@@ -48,10 +48,21 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 
 ## 3. Current baseline
 
-- `single-v1` 的框错误（938 train / 6 val / 206 clean 使用整内容区），旧 v1 run 全部作废，只保留追溯。
-- `single-v2` 已修复并冻结；四个 v2 benchmark 已建立。
-- v2 正式 baseline：**尚未重跑**（当前状态 `phase: data`）。
 - Config: `input/configs/experiments/v11/baseline.yaml`（`single-v2` / `v11-d-test-v2`）
+- Official baseline: `20261030-171041_cdcad964_s20261020_07df5c`（tag `baseline`/`v2`，`code_version=6d9ea69`）
+- Checkpoint: `output/runs/beta-regression/v11-baseline/20261030-171041_cdcad964_s20261020_07df5c/checkpoints/best.pt`
+- Val: `v11/worst_bin=2.1741`、`v11/mae_lt10=1.5016`、`v11/mae=2.3059`、`v11/acc10=0.7415`
+- Test（best.pt，四个 v2 benchmark）：
+
+| cohort | MAE | mae_lt10 | worst_bin | acc10 |
+|---|---:|---:|---:|---:|
+| D | 3.0349 | 1.2959 | 2.4069 | 0.6826 |
+| B | 1.5488 | 1.3800 | 3.9882 | 0.9524 |
+| R | 2.5793 | 2.4648 | 3.4514 | 0.9730 |
+| clean | 2.0720 | 1.3066 | 2.5848 | 0.7864 |
+
+- 验收状态：所有 cohort 的 `worst_bin` 仍 >2 mm，尚未达到成功标准。
+- 旧 v1 run 已按 D-0009 删除；v1 数据和 benchmark 文件保留为历史。
 - What is frozen vs still moving: 数据与 benchmark 已冻结；模型/损失仍可做 variant
 
 ## 4. Experiments
@@ -61,19 +72,19 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 | priority | hypothesis | change | success criterion | status | run |
 |---|---|---|---|---|---|
 | 1 | 骨干是否过度贴合训练病例 | A/B/C：ImageNet 全量 / 部分冻结 / 全冻结 | B/D 每档 <2 mm；baseline 为参照 | v1 invalid; v2 pending | - |
-| 2 | 官方 RankSim 是否迁移有效 | `mm_rank` | 与 baseline 同口径对比 | planned | - |
-| 3 | 独立投影 RankSim | `model.proj=true` | 同上 | planned | - |
+| 2 | 官方 RankSim 是否迁移有效 | `mm_rank` | 与 baseline 同口径对比 | v2 completed; single seed | `20261030-172402_f0479474_s20261020_eb2180` |
+| 3 | 独立投影 RankSim | `model.proj=true` | 同上 | v2 completed; single seed | `20261030-173919_94be0f9b_s20261020_f5ea0c` |
 
-### 4.2 Archived v1 runs（invalid input）
-
-以下 run 是 `single-v1` 的结果，因整内容区框问题**不可用于结论**；保留只为追溯，v2 结果重跑后另列。
+### 4.2 Completed v2 runs
 
 | experiment | config | status | <primary metric> | run | note |
 |---|---|---|---|---|---|
-| baseline（v1） | `v11/baseline.yaml` | invalid | `v11/worst_bin=2.4123` (D) | `20261030-152856_aff566e0_s20261020_d079ea` | v1 框错误；不要引用 |
-| backbone-full（v1） | `v11/backbone-full.yaml` | invalid | `v11/worst_bin=2.7694` (D) | `20261030-154134_d7bc9e42_s20261020_8f28f6` | v1 框错误；不要引用 |
-| backbone-partial（v1） | `v11/backbone-partial.yaml` | invalid | `v11/worst_bin=2.7225` (D) | `20261030-160100_912c1962_s20261020_d8105c` | v1 框错误；不要引用 |
-| backbone-frozen（v1） | `v11/backbone-frozen.yaml` | invalid | `v11/worst_bin=2.1665` (D) | `20261030-161734_090ff394_s20261020_c040a7` | v1 框错误；不要引用 |
+| baseline | `v11/baseline.yaml` | completed | `v11/worst_bin=2.4069` (D) | `20261030-171041_cdcad964_s20261020_07df5c` | B=3.9882 R=3.4514 clean=2.5848 |
+| ranksim | `v11/ranksim.yaml` | completed | `v11/worst_bin=2.5449` (D) | `20261030-172402_f0479474_s20261020_eb2180` | B=4.1092 R=3.5283 clean=2.7832 |
+| proj | `v11/proj.yaml` | completed | `v11/worst_bin=2.3269` (D) | `20261030-173919_94be0f9b_s20261020_f5ea0c` | B=4.2206 R=3.4034 clean=2.5387 |
+| backbone-full/partial/frozen | — | v1 invalid; v2 pending | — | — | 先完成 baseline/RankSim 对照 |
+
+逐区间图在各自 `*-eval/per_bin_mae.png`；旧的 v1 run 已删除（D-0009）。
 
 ## 5. Open questions
 
@@ -83,18 +94,19 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 ## 6. Next actions
 
 - [x] 修复 `single-v2` 框并建立四个 v2 benchmark
-- [ ] 用 v2 重跑全量训练 baseline（先不加 RankSim）
-- [ ] 在 v2 baseline 上跑 ranksim / proj 单变量对照
-- [ ] 汇总 v2 baseline / RankSim 的逐区间指标（含 0–2 mm）
-- [ ] 为 v2 结果创建 claim，并生成 report
+- [x] 用 v2 重跑 baseline、ranksim、proj
+- [x] 为每个实验生成逐区间 MAE 图（`*-eval/per_bin_mae.png`）
+- [ ] 为 v2 baseline/RankSim 结果创建 claim，并生成 report
+- [ ] 若要主张 RankSim 稳定收益，补 2–3 个 seed
+- [ ] 决定是否继续 v2 backbone 冻结组合
 - [ ] review `make gc-dry`
 
 ## 7. Known issues / gotchas
 
 - GPU 上同时跑 PolypMeasure 训练时会 OOM；迁移期先 CPU 冒烟
 - 数据集移动过两次；引用路径统一走 `$DLEF_DATA_ROOT` 的相对路径
-- `mae_ge10` 在没有 ≥10 样本时是 NaN；空区间现在也显式写 NaN（无法评价）
-- v1 run 全部作废，不要与 v2 的 `benchmark_id` 混用
+- `mae_ge10` 在没有 ≥10 样本时是 NaN；空区间也显式写 NaN（无法评价）
+- v1 run 已删除，不要与 v2 的 `benchmark_id` 混用；v1 数据和 benchmark 文件仅作历史
 - test access 会继续累计；report 会标 `WARN`，不要重复评 test 来“刷新”
 
 ## 8. Handoff checklist

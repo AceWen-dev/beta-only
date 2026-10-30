@@ -139,7 +139,7 @@ IDs are sequential (`D-0001`, `D-0002`, ...) and are never reused.
 ### D-0008 — 修 manifest 的框：v1 作废，改用 single-v2
 
 - Date: 2026-10-30
-- Status: accepted
+- Status: accepted（其中“旧 run 保留不删”由 D-0009 取代）
 - Context: DLEF 的 v1 manifest 在生成时没有复制 `bbox_content`，后续补 `content_box` 的脚本又被 `zip` 截断，导致
   train 938 行、val 6 行、test_clean 206 行把“整幅内容区”当成了框；这使 v1 上的 baseline 与 A/B/C 结果无效。
 - Decision:
@@ -150,4 +150,16 @@ IDs are sequential (`D-0001`, `D-0002`, ...) and are never reused.
 - Alternatives: 原地改 v1（违反数据集版本规则）。
 - Consequences: v1 上的 DLEF baseline 与 A/B/C 全部作废，需在 v2 重跑；旧 run 保留不删。
 - Evidence: 校验 0 个全内容框、0 个越界框、span 与源表逐行一致；`input/benchmarks/v11-*-test-v2.json`
+- Owner: twj
+
+### D-0009 — 删除 v1 run，只保留 v2 证据
+
+- Date: 2026-10-30
+- Status: accepted
+- Context: v1 输入无效，旧 run 只保留追溯价值；用户要求删除，避免实验目录干扰观察。
+- Decision: 删除全部 `single-v1` train/eval run 及未被 v2 run 引用的 artifact；保留 v1 数据和
+  v1 benchmark JSON 作为不可变历史，不删除。
+- Alternatives: 继续保留 v1 run（被用户否决）；只把 v1 run 移到外部归档（当前不需要）。
+- Consequences: RunStore 里只保留 v2 证据；v1 数字只在文档/决策历史中出现，不能与 v2 混用。
+- Evidence: 删除 21 个 v1 run、28 个 artifact；`output/runs` 只剩 v2 baseline/ranksim/proj。
 - Owner: twj
