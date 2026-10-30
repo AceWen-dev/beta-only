@@ -181,3 +181,42 @@ IDs are sequential (`D-0001`, `D-0002`, ...) and are never reused.
 - Evidence: `input/configs/experiments/v11/{ranksim,proj}.yaml`、
   `core/tests/test_config_contract.py::test_ranksim_variants_start_from_imagenet`
 - Owner: twj
+
+### D-0011 — v11 训练配方升级：80 轮 + warmup + EMA + 档位均衡采样
+
+- Date: 2026-10-30
+- Status: accepted
+- Context: 官方 RankSim 在 PolypMeasure 侧跑 40 轮得 B 1.183 / D 1.133，但第 40 轮的 dev
+  仍在单调下降（`val` 1.225、`worst` 1.761 均为全程最低），说明 40 轮不是收敛点。
+  DLEF 迁移版还缺官方配方里的两件东西：权重 EMA 与病例/档位均衡采样，所以 24 轮的
+  DLEF RankSim（B 1.37 / D 1.22）不能与官方数字直接并列。
+- Decision:
+  - 训练 80 轮：前 3 轮线性 warmup，其余余弦退火到 0；
+  - EMA decay 0.999，逐 step 更新；验证与选模都用 EMA 权重（指标名 `ema/...`）；
+  - 采样按病例尺寸档均衡：3–6 mm 档权重 1，稀有档 `min(5, base/count)`，再按病例帧数归一；
+  - 选模看 3 点平滑的 `ema/v11/worst_bin`；`min_epochs=80`，本轮不早停，先看满 80 轮曲线。
+- Alternatives: 只把轮数加到 80（缺 EMA/采样，复现不了官方量级）；只加 EMA 跑 40 轮
+  （官方曲线已否证，40 轮没收敛）。
+- Consequences: 这是一次**配方整体升级**，与 24 轮 DLEF 结果、A/B/C 结果都不是单变量对照；
+  唯一可比的对照是 PolypMeasure 官方 40 轮。若 80 轮仍在末轮创新低，下一轮加到 120。
+- Evidence: `input/configs/experiments/v11/ranksim-best.yaml`、`core/data/samplers.py`、
+  `adapters/torch/ema.py`、`DLEF/docs/TUTORIAL.md`；采样份额 2–3 mm 4.0%→13.2%、
+  7–8 mm 6.9%→12.7%（`core/tests/test_case_bin_sampler.py` 固定算法）。
+- Owner: twj
+
+### D-0012 — 拆分 80 epoch RankSim exploratory run
+
+- Date: 2026-10-30
+- Status: accepted
+- Context: 另一个 80 epoch、关闭 early stopping、`checkpoint_every=5` 的实验被用同一个
+  `experiment: v11-ranksim` 启动，和 official 40 epoch run 混在同一目录；进程已结束，
+  manifest 仍残留 `running`。
+- Decision: 新建 `ranksim-long80.yaml`（`experiment: v11-ranksim-long80`）；恢复
+  `ranksim.yaml` 为 official 40 epoch 配置；把 run `20261030-211500...` 移到
+  `v11-ranksim-long80/`，标记 killed，并保留原始 `config.resolved.json` 作为历史。
+- Alternatives: 删除该 run（用户要求保留）；继续混在 `v11-ranksim`（目录不可读）。
+- Consequences: `v11-ranksim` 只保留 official run；`v11-ranksim-long80` 是独立的
+  exploratory experiment，不参与 official 对照。
+- Evidence: `input/configs/experiments/v11/ranksim-long80.yaml`、
+  `output/runs/beta-regression/v11-ranksim-long80/20261030-211500_20c29ceb_s20261020_6841a2`
+- Owner: twj

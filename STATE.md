@@ -76,13 +76,14 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 | 2 | 官方 RankSim 是否迁移有效 | `mm_rank`，ImageNet init | 与 baseline 同数据/benchmark；注意初始化不同 | v2 completed; single seed | `20261030-175624_3138ba9c_s20261020_62c8b5` |
 | 3 | 独立投影 RankSim | `model.proj=true`，ImageNet init | 同上 | v2 completed; single seed | `20261030-181920_a6b4de94_s20261020_582999` |
 
-### 4.2 Completed v2 runs
+### 4.2 v2 runs
 
 | experiment | config | status | <primary metric> | run | note |
 |---|---|---|---|---|---|
 | baseline | `v11/baseline.yaml` | completed | `v11/worst_bin=2.4069` (D) | `20261030-171041_cdcad964_s20261020_07df5c` | B=3.9882 R=3.4514 clean=2.5848；pm/v10 init |
 | ranksim | `v11/ranksim.yaml` | completed | `v11/worst_bin=2.3954` (D) | `20261030-175624_3138ba9c_s20261020_62c8b5` | B=3.1904 R=3.8324 clean=2.6516；ImageNet init，tag `v2-imagenet` |
 | proj | `v11/proj.yaml` | completed | `v11/worst_bin=2.1149` (D) | `20261030-181920_a6b4de94_s20261020_582999` | B=3.4127 R=3.8972 clean=2.2451；ImageNet init，tag `v2-imagenet` |
+| ranksim-long80 | `v11/ranksim-long80.yaml` | killed（3 epoch） | - | `20261030-211500_20c29ceb_s20261020_6841a2` | 从 `v11-ranksim` 拆出的 80 epoch exploratory；不是 official |
 | backbone-full/partial/frozen | — | v1 invalid; v2 pending | — | — | 先完成 baseline/RankSim 对照 |
 
 逐区间图在各自 `*-eval/per_bin_mae.png`；旧的 v1 run 已删除（D-0009）；
@@ -112,6 +113,7 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 - `mae_ge10` 在没有 ≥10 样本时是 NaN；空区间也显式写 NaN（无法评价）
 - v1 run 已删除，不要与 v2 的 `benchmark_id` 混用；v1 数据和 benchmark 文件仅作历史
 - RankSim/proj 必须保持 `init_checkpoint=""`；旧的非 ImageNet 初始化 run 已删除
+- `v11-ranksim-long80` 是从 `v11-ranksim` 拆出的 80 epoch exploratory run，已 killed，不是 official
 - test access 会继续累计；report 会标 `WARN`，不要重复评 test 来“刷新”
 
 ## 8. Handoff checklist
