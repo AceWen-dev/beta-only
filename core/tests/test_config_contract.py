@@ -59,6 +59,14 @@ class ConfigContractTests(unittest.TestCase):
                     self.assertIn(name, METRICS)
                     self.assertIn(name, config.benchmark.metric_versions)
 
+    def test_ranksim_variants_start_from_imagenet(self) -> None:
+        for name in ("ranksim", "proj"):
+            with self.subTest(config=name):
+                path = ROOT / "input" / "configs" / "experiments" / "v11" / f"{name}.yaml"
+                config = load_config(path, ProjectConfig).schema
+                self.assertEqual(config.model.init_checkpoint, "")
+                self.assertEqual(config.loss.name, "mm_rank")
+
     def test_output_root_and_tensorboard_validate(self) -> None:
         with self.assertRaises(ConfigError):
             resolve_config(ProjectConfig, {"output_root": ""})

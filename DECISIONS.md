@@ -163,3 +163,21 @@ IDs are sequential (`D-0001`, `D-0002`, ...) and are never reused.
 - Consequences: RunStore 里只保留 v2 证据；v1 数字只在文档/决策历史中出现，不能与 v2 混用。
 - Evidence: 删除 21 个 v1 run、28 个 artifact；`output/runs` 只剩 v2 baseline/ranksim/proj。
 - Owner: twj
+
+### D-0010 — RankSim 系列从官方 ImageNet 权重起训
+
+- Date: 2026-10-30
+- Status: accepted
+- Context: 早期 `v11-ranksim` / `v11-proj` 配置仍加载
+  `pm/runs/size/beta-image-v10-r50-da-20261024/best.pt`，起点不是官方 ImageNet
+  权重；用户要求所有 RankSim 实验从官方权重开始。
+- Decision: `ranksim.yaml` 和 `proj.yaml` 的 `model.init_checkpoint` 设为 `""`；
+  `V11Net` 使用 torchvision `ResNet50_Weights.IMAGENET1K_V1` 作为 backbone 起点。
+  旧的 pm 初始化 RankSim runs 删除后重训，新 run 使用 `v2-imagenet` tag。
+- Alternatives: 保留旧 RankSim runs（起点不一致，结果不能作为本次对照）；
+  只改文档不改配置（不满足可复现要求）。
+- Consequences: RankSim 系列的模型初始化与 v10 checkpoint 解耦；与仍使用
+  v10 初始化的 baseline 不是严格单变量对照，报告时必须注明。
+- Evidence: `input/configs/experiments/v11/{ranksim,proj}.yaml`、
+  `core/tests/test_config_contract.py::test_ranksim_variants_start_from_imagenet`
+- Owner: twj

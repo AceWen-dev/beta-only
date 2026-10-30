@@ -205,9 +205,11 @@ output/                 generated evidence only
   `r`, or `clean`; the dataset maps it to `test_<test_set>` in the manifest.
 - `data.views` and `model.views` both exist and **must match** (2 or 3); the
   2.5× third view is code-capable but has no current config.
-- `model.init_checkpoint` is resolved relative to `$DLEF_DATA_ROOT` (the
-  baseline uses `pm/runs/...`). Clear it for smoke tests or when the file is
-  absent; otherwise model construction fails.
+- `model.init_checkpoint` is resolved relative to `$DLEF_DATA_ROOT`. The
+  baseline uses `pm/runs/...`; `ranksim` and `proj` must keep it empty so their
+  backbone starts from torchvision `ResNet50_Weights.IMAGENET1K_V1`. Clear it
+  for smoke tests or when the file is absent; otherwise model construction
+  fails.
 - `data.seed` is the data-construction seed; the top-level `seed` is the run
   seed. For `v11_frames`, membership still comes from the manifest.
 - `output_root` resolves relative to the **project root**, not the current

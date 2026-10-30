@@ -14,7 +14,9 @@ Sequence:
 5. write a JSON summary under ``output/reports/``.
 
 Run all six with no arguments, or a subset with e.g.
-``python scripts/rerun_all.py --only v11-ranksim v11-proj``.
+``python scripts/rerun_all.py --only v11-ranksim v11-proj``. Use
+``--run-tag v2-imagenet`` to distinguish a changed initialization from prior
+runs.
 """
 
 from __future__ import annotations
@@ -133,6 +135,11 @@ def main() -> int:
         action="store_true",
         help="delete the snapshotted pre-existing runs after all new runs succeed",
     )
+    parser.add_argument(
+        "--run-tag",
+        default="v2",
+        help="extra manifest tag for every new train run (default: v2)",
+    )
     args = parser.parse_args()
     targets = tuple(
         target for target in TARGETS
@@ -193,7 +200,7 @@ def main() -> int:
                 "--tag",
                 tag,
                 "--tag",
-                "v2",
+                args.run_tag,
             ],
             train_log,
         )

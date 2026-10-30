@@ -51,7 +51,7 @@ model:
   views: 2
   d_model: 64
   heads: 4
-  init_checkpoint: pm/runs/size/beta-image-v10-r50-da-20261024/best.pt
+  init_checkpoint: ""
   proj: false
   beta_ref: 0.07543606728391815
   truth_median: 5.0

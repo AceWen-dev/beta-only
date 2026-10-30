@@ -168,6 +168,12 @@ input/configs/experiments/v11/
   backbone-frozen.yaml
 ```
 
+`ranksim.yaml` and `proj.yaml` set `model.init_checkpoint: ""` so their
+backbone starts from torchvision `ResNet50_Weights.IMAGENET1K_V1`. A non-empty
+`init_checkpoint` loads a project checkpoint after that; `baseline.yaml` still
+uses the v10 checkpoint, so RankSim-vs-baseline is not a strict single-variable
+initialization comparison.
+
 A seed is a run dimension. Do not create `seed1.yaml`, `seed2.yaml`. Generated
 sweep trial configs belong under `output/sweeps/<sweep_id>/configs/`, not in
 this repository.

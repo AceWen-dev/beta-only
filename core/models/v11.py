@@ -22,14 +22,14 @@ from ..data.paths import data_root
 class V11Net(nn.Module):
     def __init__(self, config: ModelConfig):
         super().__init__()
-        from torchvision.models import resnet50
+        from torchvision.models import ResNet50_Weights, resnet50
 
         imagenet = Path.home() / ".cache/torch/hub/checkpoints/resnet50-0676ba61.pth"
         if imagenet.is_file():
             backbone = resnet50(weights=None)
             backbone.load_state_dict(torch.load(imagenet, map_location="cpu", weights_only=True))
         else:
-            backbone = resnet50(weights="IMAGENET1K_V1")
+            backbone = resnet50(weights=ResNet50_Weights.IMAGENET1K_V1)
         backbone.fc = nn.Identity()
         self.backbone = backbone
         self.beta_ref = float(config.beta_ref)
