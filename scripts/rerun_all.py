@@ -280,7 +280,8 @@ def main() -> int:
 
 if __name__ == "__main__":
     try:
-        raise SystemExit(main())
+        code = main()
     except BaseException as exc:
         log(f"FAILED: {exc!r}")
         raise
+    raise SystemExit(code)
