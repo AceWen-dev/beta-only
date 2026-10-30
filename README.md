@@ -196,12 +196,37 @@ runs. A run with `code_version: no-git` is exploratory, not reportable.
 
 `tensorboard.enabled: true` writes event files under each run directory:
 
-```bash
-tensorboard --logdir output/runs --port 6006
+```text
+output/runs/<project>/<experiment>/<run_id>/tensorboard/
 ```
 
-TensorBoard is an optional mirror. `manifest.json`, `config.resolved.json`,
-`metrics.jsonl` and `logs/train.log` remain the source of truth.
+Start the local UI:
+
+```bash
+make tensorboard
+# equivalent to:
+python -m tensorboard.main --logdir output/runs --port 6006
+```
+
+Open <http://localhost:6006>. Remote machine:
+
+```bash
+make tensorboard TENSORBOARD_ARGS=--bind_all
+# or keep it local and tunnel from your laptop:
+ssh -L 6006:localhost:6006 user@host
+```
+
+What is logged:
+
+- `train/loss` and named loss terms (`train/mm_case_bin`, `train/rank`);
+- `val/v11/mae`, `val/v11/worst_bin`, `val/v11/acc10` and per-bin metrics;
+- `run/config` and `run/manifest` as text (Text tab).
+
+Runs are grouped by their `output/runs/...` path; use the experiment/run names
+to compare. TensorBoard is a **mirror**, not the record: `manifest.json`,
+`config.resolved.json`, `metrics.jsonl` and `logs/train.log` are the source of
+truth. Set `tensorboard.enabled: false` to disable it. Use
+`TENSORBOARD_PORT=6007` to change the port.
 
 ## Inspect a run
 

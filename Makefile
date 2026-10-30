@@ -3,8 +3,10 @@ CONFIG ?= input/configs/experiments/v11/baseline.yaml
 OUTPUT ?= $(if $(DLEF_OUTPUT_ROOT),$(DLEF_OUTPUT_ROOT),output)
 EXPERIMENT ?= v11
 GC_METRIC ?= v11/worst_bin
+TENSORBOARD_PORT ?= 6006
+TENSORBOARD_ARGS ?=
 
-.PHONY: train eval inspect runs runs-all configs sweep report gc-dry check audit new-experiment new-benchmark status handoff test doctor
+.PHONY: train eval inspect runs runs-all configs sweep report gc-dry check audit new-experiment new-benchmark status handoff test doctor tensorboard
 
 train:
 	$(PYTHON) core/commands/train.py --config $(CONFIG)
@@ -22,6 +24,9 @@ runs:
 
 runs-all:
 	$(PYTHON) core/tools/runs.py --runs $(OUTPUT)/runs --all
+
+tensorboard:
+	$(PYTHON) -m tensorboard.main --logdir $(OUTPUT)/runs --port $(TENSORBOARD_PORT) $(TENSORBOARD_ARGS)
 
 configs:
 	$(PYTHON) core/tools/configs.py list --check

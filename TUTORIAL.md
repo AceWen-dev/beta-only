@@ -243,8 +243,29 @@ RunStore 是唯一事实源；TensorBoard 只是镜像。
 TensorBoard：
 
 ```bash
-tensorboard --logdir output/runs --port 6006
+make tensorboard
+# 等价于
+python -m tensorboard.main --logdir output/runs --port 6006
 ```
+
+打开 `http://localhost:6006`。远程机器可以：
+
+```bash
+# 服务器只监听 localhost，本地建隧道：
+ssh -L 6006:localhost:6006 user@host
+
+# 或让 TensorBoard 对外监听（注意网络权限）：
+make tensorboard TENSORBOARD_ARGS=--bind_all
+```
+
+会看到：
+
+- `train/loss` 和命名 loss terms；
+- `val/v11/mae`、`val/v11/worst_bin`、`val/v11/acc10` 以及逐区间指标；
+- Text 页签里的 `run/config`、`run/manifest`。
+
+TensorBoard 只用于看曲线；最终数字以 `manifest.json`、`evals/*.json`、
+`metrics.jsonl` 和 `logs/train.log` 为准。
 
 ---
 
