@@ -6,7 +6,7 @@ phase: ablation         # setup | data | baseline | ablation | benchmark | repor
 updated: "2026-10-30"
 owner: twj
 primary_metric: "v11"
-best_run: "20261030-173919_94be0f9b_s20261020_f5ea0c"
+best_run: "20261030-181920_a6b4de94_s20261020_582999"
 benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018147"
 ---
 
@@ -50,6 +50,7 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 
 - Config: `input/configs/experiments/v11/baseline.yaml`（`single-v2` / `v11-d-test-v2`）
 - Official baseline: `20261030-171041_cdcad964_s20261020_07df5c`（tag `baseline`/`v2`，`code_version=6d9ea69`）
+- Baseline initialization: `pm/runs/size/beta-image-v10-r50-da-20261024/best.pt`，**不是 ImageNet 起点**。
 - Checkpoint: `output/runs/beta-regression/v11-baseline/20261030-171041_cdcad964_s20261020_07df5c/checkpoints/best.pt`
 - Val: `v11/worst_bin=2.1741`、`v11/mae_lt10=1.5016`、`v11/mae=2.3059`、`v11/acc10=0.7415`
 - Test（best.pt，四个 v2 benchmark）：
@@ -72,19 +73,20 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 | priority | hypothesis | change | success criterion | status | run |
 |---|---|---|---|---|---|
 | 1 | 骨干是否过度贴合训练病例 | A/B/C：ImageNet 全量 / 部分冻结 / 全冻结 | B/D 每档 <2 mm；baseline 为参照 | v1 invalid; v2 pending | - |
-| 2 | 官方 RankSim 是否迁移有效 | `mm_rank` | 与 baseline 同口径对比 | v2 completed; single seed | `20261030-172402_f0479474_s20261020_eb2180` |
-| 3 | 独立投影 RankSim | `model.proj=true` | 同上 | v2 completed; single seed | `20261030-173919_94be0f9b_s20261020_f5ea0c` |
+| 2 | 官方 RankSim 是否迁移有效 | `mm_rank`，ImageNet init | 与 baseline 同数据/benchmark；注意初始化不同 | v2 completed; single seed | `20261030-175624_3138ba9c_s20261020_62c8b5` |
+| 3 | 独立投影 RankSim | `model.proj=true`，ImageNet init | 同上 | v2 completed; single seed | `20261030-181920_a6b4de94_s20261020_582999` |
 
 ### 4.2 Completed v2 runs
 
 | experiment | config | status | <primary metric> | run | note |
 |---|---|---|---|---|---|
-| baseline | `v11/baseline.yaml` | completed | `v11/worst_bin=2.4069` (D) | `20261030-171041_cdcad964_s20261020_07df5c` | B=3.9882 R=3.4514 clean=2.5848 |
-| ranksim | `v11/ranksim.yaml` | completed | `v11/worst_bin=2.5449` (D) | `20261030-172402_f0479474_s20261020_eb2180` | B=4.1092 R=3.5283 clean=2.7832 |
-| proj | `v11/proj.yaml` | completed | `v11/worst_bin=2.3269` (D) | `20261030-173919_94be0f9b_s20261020_f5ea0c` | B=4.2206 R=3.4034 clean=2.5387 |
+| baseline | `v11/baseline.yaml` | completed | `v11/worst_bin=2.4069` (D) | `20261030-171041_cdcad964_s20261020_07df5c` | B=3.9882 R=3.4514 clean=2.5848；pm/v10 init |
+| ranksim | `v11/ranksim.yaml` | completed | `v11/worst_bin=2.3954` (D) | `20261030-175624_3138ba9c_s20261020_62c8b5` | B=3.1904 R=3.8324 clean=2.6516；ImageNet init，tag `v2-imagenet` |
+| proj | `v11/proj.yaml` | completed | `v11/worst_bin=2.1149` (D) | `20261030-181920_a6b4de94_s20261020_582999` | B=3.4127 R=3.8972 clean=2.2451；ImageNet init，tag `v2-imagenet` |
 | backbone-full/partial/frozen | — | v1 invalid; v2 pending | — | — | 先完成 baseline/RankSim 对照 |
 
-逐区间图在各自 `*-eval/per_bin_mae.png`；旧的 v1 run 已删除（D-0009）。
+逐区间图在各自 `*-eval/per_bin_mae.png`；旧的 v1 run 已删除（D-0009）；
+旧的非 ImageNet 初始化 RankSim/proj run 也已删除，只保留新 `v2-imagenet` 结果。
 
 ## 5. Open questions
 
@@ -95,7 +97,9 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 
 - [x] 修复 `single-v2` 框并建立四个 v2 benchmark
 - [x] 用 v2 重跑 baseline、ranksim、proj
+- [x] 删除 pm 初始化的旧 RankSim runs，按 ImageNet 起点重训（D-0010）
 - [x] 为每个实验生成逐区间 MAE 图（`*-eval/per_bin_mae.png`）
+- [ ] 决定 baseline 是否也统一到 ImageNet 起点；当前 baseline 仍是 v10 init
 - [ ] 为 v2 baseline/RankSim 结果创建 claim，并生成 report
 - [ ] 若要主张 RankSim 稳定收益，补 2–3 个 seed
 - [ ] 决定是否继续 v2 backbone 冻结组合
@@ -107,6 +111,7 @@ benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018
 - 数据集移动过两次；引用路径统一走 `$DLEF_DATA_ROOT` 的相对路径
 - `mae_ge10` 在没有 ≥10 样本时是 NaN；空区间也显式写 NaN（无法评价）
 - v1 run 已删除，不要与 v2 的 `benchmark_id` 混用；v1 数据和 benchmark 文件仅作历史
+- RankSim/proj 必须保持 `init_checkpoint=""`；旧的非 ImageNet 初始化 run 已删除
 - test access 会继续累计；report 会标 `WARN`，不要重复评 test 来“刷新”
 
 ## 8. Handoff checklist
