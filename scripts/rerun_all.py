@@ -1,21 +1,25 @@
 #!/usr/bin/env python3
-"""Rerun the v11 baseline and backbone variants, then remove old runs.
+"""Rerun selected v11 experiments, then remove their old runs.
 
 This is a project-specific orchestration script. It assumes the project virtual
 environment is active, ``DLEF_DATA_ROOT`` is set, and the git worktree is clean
 so every new run records a real ``code_version``.
 
 Sequence:
-1. snapshot existing runs for the target experiments;
-2. train each config in order (baseline first);
+1. snapshot existing runs for the selected experiments;
+2. train each config in order;
 3. evaluate each new run on all four frozen benchmarks using ``best.pt``;
 4. only if every train/eval succeeds, delete the snapshotted old runs and GC
    their now-unreferenced artifacts;
 5. write a JSON summary under ``output/reports/``.
+
+Run all six with no arguments, or a subset with e.g.
+``python scripts/rerun_all.py --only v11-ranksim v11-proj``.
 """
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import subprocess
@@ -36,6 +40,8 @@ TARGETS = (
     ("v11-backbone-full", "input/configs/experiments/v11/backbone-full.yaml", "backbone-full"),
     ("v11-backbone-partial", "input/configs/experiments/v11/backbone-partial.yaml", "backbone-partial"),
     ("v11-backbone-frozen", "input/configs/experiments/v11/backbone-frozen.yaml", "backbone-frozen"),
+    ("v11-ranksim", "input/configs/experiments/v11/ranksim.yaml", "ranksim"),
+    ("v11-proj", "input/configs/experiments/v11/proj.yaml", "proj"),
 )
 
 # (benchmark suffix, data.test_set override or None for the default D cohort)
@@ -112,6 +118,20 @@ def read_eval(run) -> dict:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--only",
+        nargs="+",
+        choices=[name for name, _, _ in TARGETS],
+        default=None,
+        help="run only these experiment names (default: all)",
+    )
+    args = parser.parse_args()
+    targets = tuple(
+        target for target in TARGETS
+        if args.only is None or target[0] in args.only
+    )
+
     if not os.environ.get("DLEF_DATA_ROOT"):
         raise SystemExit("DLEF_DATA_ROOT is not set")
 
@@ -140,7 +160,7 @@ def main() -> int:
     if running:
         raise SystemExit(f"refusing to rerun while runs are still running: {running}")
 
-    target_names = {name for name, _, _ in TARGETS}
+    target_names = {name for name, _, _ in targets}
     target_names |= {f"{name}-eval" for name in target_names}
     old_ids = {
         run.run_id
@@ -149,11 +169,12 @@ def main() -> int:
     }
 
     log(f"project commit: {commit}")
+    log(f"selected experiments: {', '.join(name for name, _, _ in targets)}")
     log(f"old runs to delete after successful rerun: {len(old_ids)}")
     log(f"log: {LOG_PATH}")
 
     results = []
-    for experiment, config, tag in TARGETS:
+    for experiment, config, tag in targets:
         before = ids_for(experiment)
         train_log = REPORT_ROOT / f"rerun_{STAMP}_{experiment}.log"
         run_command(
@@ -281,6 +302,10 @@ def main() -> int:
 if __name__ == "__main__":
     try:
         code = main()
+    except SystemExit as exc:
+        if exc.code not in (0, None):
+            log(f"FAILED: {exc!r}")
+        raise
     except BaseException as exc:
         log(f"FAILED: {exc!r}")
         raise
