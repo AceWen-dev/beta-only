@@ -3,14 +3,14 @@
 One JSON file per frozen benchmark:
 
 ```text
-v11-b-test-v1.json
-v11-d-test-v1.json
-v11-r-test-v1.json
-v11-clean-test-v1.json
+v11-b-test-v2.json
+v11-d-test-v2.json
+v11-r-test-v2.json
+v11-clean-test-v2.json
 ```
 
 These are the four project test sets (B / D / R / cleaned company set). The
-default development benchmark is `v11-d-test-v1`.
+default development benchmark is `v11-d-test-v2`.
 
 A benchmark freezes:
 

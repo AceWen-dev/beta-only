@@ -135,3 +135,19 @@ IDs are sequential (`D-0001`, `D-0002`, ...) and are never reused.
   用新代码重跑，旧 run 在新 run 成功后删除。
 - Evidence: DLEF `937f11e`、`scripts/rerun_all.py`、`output/reports/rerun_*.json`
 - Owner: twj
+
+### D-0008 — 修 manifest 的框：v1 作废，改用 single-v2
+
+- Date: 2026-10-30
+- Status: accepted
+- Context: DLEF 的 v1 manifest 在生成时没有复制 `bbox_content`，后续补 `content_box` 的脚本又被 `zip` 截断，导致
+  train 938 行、val 6 行、test_clean 206 行把“整幅内容区”当成了框；这使 v1 上的 baseline 与 A/B/C 结果无效。
+- Decision:
+  - 框按来源逐行回填：v2 公司表 757、lesion-query 840、A/V 掩码 104、B/D/R/clean 测试表 751；
+  - 新建 `curated/v11_frames/single-v2`，v1 保留只为追溯；
+  - 指标改为 0–10 mm 全区间，空区间报 `NaN`（无法评价），`worst_bin` 只对非空区间取最大；
+  - 新建四个 v2 benchmark（`v11-{b,d,r,clean}-test-v2`）。
+- Alternatives: 原地改 v1（违反数据集版本规则）。
+- Consequences: v1 上的 DLEF baseline 与 A/B/C 全部作废，需在 v2 重跑；旧 run 保留不删。
+- Evidence: 校验 0 个全内容框、0 个越界框、span 与源表逐行一致；`input/benchmarks/v11-*-test-v2.json`
+- Owner: twj

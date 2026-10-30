@@ -8,9 +8,9 @@ so every new run records a real ``code_version``.
 Sequence:
 1. snapshot existing runs for the selected experiments;
 2. train each config in order;
-3. evaluate each new run on all four frozen benchmarks using ``best.pt``;
-4. only if every train/eval succeeds, delete the snapshotted old runs and GC
-   their now-unreferenced artifacts;
+3. evaluate each new run on all four v2 frozen benchmarks using ``best.pt``;
+4. keep pre-existing runs by default; ``--delete-old`` removes them only after
+   every new train/eval succeeds, then GCs unreferenced artifacts;
 5. write a JSON summary under ``output/reports/``.
 
 Run all six with no arguments, or a subset with e.g.
@@ -51,6 +51,8 @@ BENCHMARKS = (
     ("r", "r"),
     ("clean", "clean"),
 )
+
+BENCHMARK_SUFFIX = "-test-v2"
 
 STAMP = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
 LOG_PATH = REPORT_ROOT / f"rerun_{STAMP}.log"
@@ -126,6 +128,11 @@ def main() -> int:
         default=None,
         help="run only these experiment names (default: all)",
     )
+    parser.add_argument(
+        "--delete-old",
+        action="store_true",
+        help="delete the snapshotted pre-existing runs after all new runs succeed",
+    )
     args = parser.parse_args()
     targets = tuple(
         target for target in TARGETS
@@ -170,7 +177,7 @@ def main() -> int:
 
     log(f"project commit: {commit}")
     log(f"selected experiments: {', '.join(name for name, _, _ in targets)}")
-    log(f"old runs to delete after successful rerun: {len(old_ids)}")
+    log(f"pre-existing runs found (kept unless --delete-old): {len(old_ids)}")
     log(f"log: {LOG_PATH}")
 
     results = []
@@ -185,6 +192,8 @@ def main() -> int:
                 config,
                 "--tag",
                 tag,
+                "--tag",
+                "v2",
             ],
             train_log,
         )
@@ -208,7 +217,7 @@ def main() -> int:
                 "--split",
                 "test",
                 "--benchmark",
-                str(BENCHMARK_ROOT / f"v11-{suffix}-test-v1.json"),
+                str(BENCHMARK_ROOT / f"v11-{suffix}{BENCHMARK_SUFFIX}.json"),
             ]
             if test_set is not None:
                 args.extend(["--set", f"data.test_set={test_set}"])
@@ -243,52 +252,59 @@ def main() -> int:
             }
         )
 
-    # All trainings/evals succeeded: remove only the snapshotted old runs.
-    actions = []
-    for run in store.iter_runs():
-        selected = run.run_id in old_ids
-        actions.append(
-            RunAction(
-                run_id=run.run_id,
-                project=run.manifest.project,
-                experiment=run.manifest.experiment,
-                action="delete" if selected else "keep",
-                reason="old run replaced by rerun" if selected else "new rerun",
-                size_bytes=run.size_bytes(),
-                path=str(run.dir),
-                started_at=run.manifest.started_at,
+    deleted_old_run_ids: list[str] = []
+    if args.delete_old:
+        # All trainings/evals succeeded: remove only the snapshotted old runs.
+        actions = []
+        for run in store.iter_runs():
+            selected = run.run_id in old_ids
+            actions.append(
+                RunAction(
+                    run_id=run.run_id,
+                    project=run.manifest.project,
+                    experiment=run.manifest.experiment,
+                    action="delete" if selected else "keep",
+                    reason="old run replaced by rerun" if selected else "new rerun",
+                    size_bytes=run.size_bytes(),
+                    path=str(run.dir),
+                    started_at=run.manifest.started_at,
+                )
+            )
+        deletion = RetentionService(store).apply(
+            GcPlan(runs=tuple(actions)), dry_run=False
+        )
+        deleted_old_run_ids = list(deletion.deleted_runs)
+        log(f"deleted old runs: {len(deleted_old_run_ids)}")
+
+        artifact_plan = RetentionService(store).plan(
+            RetentionPolicy(
+                keep_last=1000,
+                keep_best=0,
+                keep_every=0,
+                metric_key="",
+                metric_mode="min",
+                keep_tags=frozenset({"reported", "baseline", "debug"}),
+                protect_status=frozenset({"running"}),
+                min_age_days=0,
+                artifact_ttl_days=0,
+                protect_sweep_runs=False,
             )
         )
-    deletion = RetentionService(store).apply(GcPlan(runs=tuple(actions)), dry_run=False)
-    log(f"deleted old runs: {len(deletion.deleted_runs)}")
-
-    artifact_plan = RetentionService(store).plan(
-        RetentionPolicy(
-            keep_last=1000,
-            keep_best=0,
-            keep_every=0,
-            metric_key="",
-            metric_mode="min",
-            keep_tags=frozenset({"reported", "baseline", "debug"}),
-            protect_status=frozenset({"running"}),
-            min_age_days=0,
-            artifact_ttl_days=0,
-            protect_sweep_runs=False,
-        )
-    )
-    if artifact_plan.delete_runs:
-        raise RuntimeError(
-            "artifact GC would delete runs: "
-            + ", ".join(action.run_id for action in artifact_plan.delete_runs)
-        )
-    artifact_result = RetentionService(store).apply(artifact_plan, dry_run=False)
-    log(f"deleted unreferenced artifacts: {len(artifact_result.deleted_artifacts)}")
+        if artifact_plan.delete_runs:
+            raise RuntimeError(
+                "artifact GC would delete runs: "
+                + ", ".join(action.run_id for action in artifact_plan.delete_runs)
+            )
+        artifact_result = RetentionService(store).apply(artifact_plan, dry_run=False)
+        log(f"deleted unreferenced artifacts: {len(artifact_result.deleted_artifacts)}")
+    else:
+        log(f"kept {len(old_ids)} pre-existing runs (pass --delete-old to remove)")
 
     summary = {
         "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "project_commit": commit,
         "log": str(LOG_PATH),
-        "deleted_old_run_ids": list(deletion.deleted_runs),
+        "deleted_old_run_ids": deleted_old_run_ids,
         "runs": results,
     }
     SUMMARY_PATH.write_text(

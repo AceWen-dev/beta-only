@@ -13,9 +13,9 @@ non_goals:
   - "不做视频流稳定化（另有 BetaImagingNet）"
 
 data:
-  root: "curated/v11_frames/single-v1"
+  root: "curated/v11_frames/single-v2"
   name: "v11_frames"
-  version: "single-v1"
+  version: "single-v2"
   sample_id: "sample_id"
   labels: "y"
   units: "mm"
@@ -28,9 +28,9 @@ splits:
   test_frozen: true
 
 benchmark:
-  name: "v11-d-test-v1"
+  name: "v11-d-test-v2"
   label_version: "single-v1"
-  metric_protocol: "mae per 1 mm bin; worst_bin = max over 2-9 mm; acc10 at 10 mm"
+  metric_protocol: "mae per 1 mm bin 0-10; worst_bin = max over non-empty 0-10 bins; acc10 at 10 mm"
 
 created: "2026-10-30"
 dlef_commit: "8b13259"

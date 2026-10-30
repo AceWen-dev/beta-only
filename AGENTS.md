@@ -43,13 +43,13 @@ the 1–2 step smoke test. Do not write code until the plan is confirmed.
 ### 0.3 Stable facts
 
 - Project id: `beta-regression`.
-- Data: `v11_frames`, version `single-v1`, under `$DLEF_DATA_ROOT`.
-- Membership: `curated/v11_frames/single-v1/manifest.json`; train/val/test are
+- Data: `v11_frames`, version `single-v2`, under `$DLEF_DATA_ROOT`.
+- Membership: `curated/v11_frames/single-v2/manifest.json`; train/val/test are
   case-grouped by `case_id`.
-- Primary metric: `v11`; `v11/worst_bin` is the worst 2–9 mm bin MAE.
+- Primary metric: `v11`; `v11/worst_bin` is the worst non-empty 0–10 mm bin MAE.
   `v11/mae_lt10` and `v11/acc10` are reported alongside.
-- Frozen tests: `v11-b-test-v1`, `v11-d-test-v1`, `v11-r-test-v1`,
-  `v11-clean-test-v1`; the default development benchmark is `v11-d-test-v1`.
+- Frozen tests: `v11-b-test-v2`, `v11-d-test-v2`, `v11-r-test-v2`,
+  `v11-clean-test-v2`; the default development benchmark is `v11-d-test-v2`.
 - Default experiment config: `input/configs/experiments/v11/baseline.yaml`.
 - `input/configs/base.yaml` is the synthetic smoke config only. `make train`,
   `make audit` and `make check` default to the v11 baseline.
@@ -114,7 +114,7 @@ python core/commands/eval.py \
 python core/commands/eval.py \
   --checkpoint output/runs/beta-regression/v11-baseline/<run_id>/checkpoints/best.pt \
   --split test \
-  --benchmark input/benchmarks/v11-d-test-v1.json
+  --benchmark input/benchmarks/v11-d-test-v2.json
 ```
 
 `eval.py` reuses the training run's `config.resolved.json` (found next to the
@@ -125,7 +125,7 @@ from `--benchmark`, so for B/R/clean add the matching override:
 python core/commands/eval.py \
   --checkpoint .../checkpoints/best.pt \
   --split test \
-  --benchmark input/benchmarks/v11-b-test-v1.json \
+  --benchmark input/benchmarks/v11-b-test-v2.json \
   --set data.test_set=b
 ```
 
@@ -201,7 +201,7 @@ output/                 generated evidence only
 - `data.split=manifest`: membership comes from the manifest, not a runtime
   random split. Never call `random_split`. A new split or data version is a new
   run, not an edit.
-- `data.version=single-v1` is the curated version. `data.test_set` is `b`, `d`,
+- `data.version=single-v2` is the curated version. `data.test_set` is `b`, `d`,
   `r`, or `clean`; the dataset maps it to `test_<test_set>` in the manifest.
 - `data.views` and `model.views` both exist and **must match** (2 or 3); the
   2.5× third view is code-capable but has no current config.

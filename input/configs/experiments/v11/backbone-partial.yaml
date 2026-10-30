@@ -22,7 +22,7 @@ tensorboard:
 
 data:
   name: v11_frames
-  version: single-v1
+  version: single-v2
   seed: 7
   split: manifest
   n_train: 1
@@ -37,12 +37,12 @@ data:
   max_samples: 0
 
 benchmark:
-  name: v11-d-test-v1
+  name: v11-d-test-v2
   label_version: single-v1
   evaluator_version: "1"
   aggregation: mean
   metric_versions:
-    v11: v1
+    v11: v2
   thresholds: {}
 
 model:

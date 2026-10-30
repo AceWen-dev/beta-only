@@ -17,23 +17,23 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = os.environ.get("DLEF_DATA_ROOT")
 MANIFEST = (
-    Path(DATA_ROOT) / "curated" / "v11_frames" / "single-v1" / "manifest.json"
+    Path(DATA_ROOT) / "curated" / "v11_frames" / "single-v2" / "manifest.json"
     if DATA_ROOT
     else None
 )
 
 BENCHMARKS = {
-    "v11-b-test-v1.json": "b",
-    "v11-d-test-v1.json": "d",
-    "v11-r-test-v1.json": "r",
-    "v11-clean-test-v1.json": "clean",
+    "v11-b-test-v2.json": "b",
+    "v11-d-test-v2.json": "d",
+    "v11-r-test-v2.json": "r",
+    "v11-clean-test-v2.json": "clean",
 }
 
 
 @unittest.skipUnless(TORCH_AVAILABLE, "torch is not installed")
 @unittest.skipUnless(
     MANIFEST is not None and MANIFEST.is_file(),
-    "set DLEF_DATA_ROOT with the v11_frames single-v1 manifest to test benchmarks",
+    "set DLEF_DATA_ROOT with the v11_frames single-v2 manifest to test benchmarks",
 )
 class V11BenchmarkTests(unittest.TestCase):
     def test_frozen_benchmarks_match_current_data_and_protocol(self) -> None:

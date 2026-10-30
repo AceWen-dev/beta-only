@@ -31,8 +31,8 @@ make test
 
 ```text
 $DLEF_DATA_ROOT/
-  curated/v11_frames/single-v1/manifest.json
-  curated/v11_frames/single-v1/...       # 图像 + depth feature
+  curated/v11_frames/single-v2/manifest.json
+  curated/v11_frames/single-v2/...       # 图像 + depth feature
 ```
 
 本机数据根目录是 `Betaregression_data/`，里面有 `pm/` 和 `images_new/` 的
@@ -71,7 +71,7 @@ input/configs/experiments/v11/baseline.yaml
 
 数据口径：
 
-- 数据集：`v11_frames` / `single-v1`
+- 数据集：`v11_frames` / `single-v2`
 - 样本按 `case_id` 分组，帧不跨 train/val/test
 - 标签：单张图的镜下息肉尺寸，单位 mm
 - 四个测试集：B / D / R / 清洗公司
@@ -80,10 +80,10 @@ input/configs/experiments/v11/baseline.yaml
 
 ```text
 input/benchmarks/
-  v11-b-test-v1.json
-  v11-d-test-v1.json
-  v11-r-test-v1.json
-  v11-clean-test-v1.json
+  v11-b-test-v2.json
+  v11-d-test-v2.json
+  v11-r-test-v2.json
+  v11-clean-test-v2.json
 ```
 
 benchmark 包含：
@@ -158,16 +158,16 @@ test 必须显式给 benchmark：
 python core/commands/eval.py \
   --checkpoint output/runs/beta-regression/v11-baseline/<run_id>/checkpoints/best.pt \
   --split test \
-  --benchmark input/benchmarks/v11-d-test-v1.json
+  --benchmark input/benchmarks/v11-d-test-v2.json
 ```
 
 其余三个换 `--benchmark`，并加对应的 `--set data.test_set=...`；`eval.py`
 不会从 benchmark 文件推断 cohort：
 
 ```text
-B     --benchmark input/benchmarks/v11-b-test-v1.json     --set data.test_set=b
-R     --benchmark input/benchmarks/v11-r-test-v1.json     --set data.test_set=r
-clean --benchmark input/benchmarks/v11-clean-test-v1.json --set data.test_set=clean
+B     --benchmark input/benchmarks/v11-b-test-v2.json     --set data.test_set=b
+R     --benchmark input/benchmarks/v11-r-test-v2.json     --set data.test_set=r
+clean --benchmark input/benchmarks/v11-clean-test-v2.json --set data.test_set=clean
 ```
 
 如果当前数据和 benchmark 的 `benchmark_id` 不一致，`eval.py` 会拒绝运行。
@@ -279,7 +279,7 @@ from dlef.claim import Claim, ClaimStore
 ClaimStore("output/claims").add(
     Claim(
         claim_id="main-result",
-        text="v11 baseline on v11-d-test-v1",
+        text="v11 baseline on v11-d-test-v2",
         eval_ids=("<eval-id>",),
         metric="v11/worst_bin",
         benchmark_id="sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e818",

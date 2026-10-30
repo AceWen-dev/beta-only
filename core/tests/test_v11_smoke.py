@@ -25,7 +25,7 @@ except ImportError:
 ROOT = Path(__file__).resolve().parents[2]
 DATA_ROOT = os.environ.get("DLEF_DATA_ROOT")
 MANIFEST = (
-    Path(DATA_ROOT) / "curated" / "v11_frames" / "single-v1" / "manifest.json"
+    Path(DATA_ROOT) / "curated" / "v11_frames" / "single-v2" / "manifest.json"
     if DATA_ROOT
     else None
 )
@@ -47,7 +47,7 @@ class StubBackbone(nn.Module):
 @unittest.skipUnless(TORCH_AVAILABLE, "torch is not installed")
 @unittest.skipUnless(
     MANIFEST is not None and MANIFEST.is_file(),
-    "set DLEF_DATA_ROOT with the v11_frames single-v1 manifest to run the smoke test",
+    "set DLEF_DATA_ROOT with the v11_frames single-v2 manifest to run the smoke test",
 )
 class V11SmokeTests(unittest.TestCase):
     def _config(self, **overrides):

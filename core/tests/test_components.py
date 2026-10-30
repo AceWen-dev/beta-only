@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import unittest
 
 try:
@@ -103,6 +104,19 @@ class ComponentTests(unittest.TestCase):
             {"y": torch.tensor([2.0, 4.0])},
         )
         self.assertAlmostEqual(metric.compute().values["mae"], 1.5)
+
+    def test_v11_metric_bins_include_under_two(self) -> None:
+        metric = build_metrics(["v11"])["v11"]
+        metric.update(
+            ModelOutput(predictions=torch.tensor([1.0, 2.5, 3.0, 10.0])),
+            {"y": torch.tensor([0.5, 1.5, 2.5, 9.5])},
+        )
+        values = metric.compute().values
+        self.assertAlmostEqual(float(values["mae_0_1"]), 0.5)
+        self.assertAlmostEqual(float(values["mae_1_2"]), 1.0)
+        self.assertAlmostEqual(float(values["mae_9_10"]), 0.5)
+        self.assertTrue(math.isnan(values["mae_3_4"]))
+        self.assertAlmostEqual(float(values["worst_bin"]), 1.0)
 
     def test_optimizers_and_schedulers(self) -> None:
         model = build_model(ModelConfig(name="linear"), device="cpu")

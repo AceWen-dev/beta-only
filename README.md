@@ -26,16 +26,16 @@ generated evidence in `output/`.
 - Input: whole-frame RGB + tight 1.25× RGB view, frozen relative-depth features,
   and ten geometric scalars.
 - Output: diameter in mm and a `<10 / >=10 mm` decision.
-- Primary metric: `v11` (`v11/worst_bin` is the worst 2–9 mm bin MAE;
+- Primary metric: `v11` (`v11/worst_bin` is the worst non-empty 0–10 mm bin MAE;
   `v11/mae_lt10` and `v11/acc10` are reported alongside).
 - Test sets: four frozen benchmarks, one per evaluation cohort.
 
 | Benchmark | Test set | `benchmark_id` |
 |---|---|---|
-| `v11-b-test-v1` | B | `sha256:01efba8b…8f84` |
-| `v11-d-test-v1` | D (dev/default) | `sha256:6f6c3a39…e818` |
-| `v11-r-test-v1` | R | `sha256:c0bed53e…39ce` |
-| `v11-clean-test-v1` | cleaned company set | `sha256:8325ad37…45cb` |
+| `v11-b-test-v2` | B | `sha256:911defbf…6ecb` |
+| `v11-d-test-v2` | D (dev/default) | `sha256:2c4d4bee…8147` |
+| `v11-r-test-v2` | R | `sha256:983c48b6…24be` |
+| `v11-clean-test-v2` | cleaned company set | `sha256:6a76a698…97ad` |
 
 Full ids are in [`STATE.md`](STATE.md) and the JSON manifests under
 `input/benchmarks/`. Numbers are comparable only within the same
@@ -95,8 +95,8 @@ export DLEF_DATA_ROOT=/path/to/Betaregression_data
 Dataset bytes are not committed. `$DLEF_DATA_ROOT` contains at least:
 
 ```text
-curated/v11_frames/single-v1/manifest.json
-curated/v11_frames/single-v1/...   # images + depth feature files
+curated/v11_frames/single-v2/manifest.json
+curated/v11_frames/single-v2/...   # images + depth feature files
 ```
 
 The manifest rows use paths relative to `$DLEF_DATA_ROOT`.
@@ -141,7 +141,7 @@ evaluation is a separate run and must use a frozen benchmark:
 python core/commands/eval.py \
   --checkpoint output/runs/beta-regression/v11-baseline/<run_id>/checkpoints/best.pt \
   --split test \
-  --benchmark input/benchmarks/v11-d-test-v1.json
+  --benchmark input/benchmarks/v11-d-test-v2.json
 ```
 
 Training writes `best.pt` at the best validation epoch when early stopping is
@@ -288,7 +288,8 @@ by hand.
 
 ## Current status
 
-See [`STATE.md`](STATE.md). The first completed `v11-baseline` run was produced
-before the seed/RNG fix and before the project had a git commit; it is
-**exploratory** (`code_version: no-git`). The official baseline must be rerun
-after committing the project and then evaluated on the four frozen benchmarks.
+See [`STATE.md`](STATE.md). The original `single-v1` boxes were corrupted
+(938/2044 train frames and all 206 clean-test frames used the whole content
+region), so v1 runs are retained only for traceability. `single-v2` restores the
+source boxes and has four new frozen benchmarks; the authoritative baseline must
+be rerun on v2.

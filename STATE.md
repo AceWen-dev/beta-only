@@ -2,12 +2,12 @@
 
 ---
 project: "beta-regression"
-phase: ablation         # setup | data | baseline | ablation | benchmark | report
+phase: data             # setup | data | baseline | ablation | benchmark | report
 updated: "2026-10-30"
 owner: twj
 primary_metric: "v11"
-best_run: "20261030-152856_aff566e0_s20261020_d079ea"
-benchmark: "sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e818"
+best_run: "-"
+benchmark: "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018147"
 ---
 
 ## 1. Question and scope
@@ -23,7 +23,7 @@ benchmark: "sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e
 ## 2. Data and splits
 
 - Data root: `$DLEF_DATA_ROOT`（本机指向 `Betaregression_data/`，内含 `pm/` 与 `images_new/` 两个符号链接）
-- Dataset / version: `v11_frames` / `single-v1`
+- Dataset / version: `v11_frames` / `single-v2`（v1 框错误，已作废）
 - Sample id: `case_id::image_stem`
 - Labels / units: 镜下尺寸（单值），mm
 - Split policy:
@@ -31,11 +31,16 @@ benchmark: "sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e
   - val: 205 帧（manifest split=val，含 2–3 与 9–10 尾档）
   - test: 四个冻结 benchmark（B 210 / D 356 / R 185 / 清洗公司 206）
   - grouping / leakage rule: 按 `case_id`；测试集不参与训练与选模
-- Frozen benchmark:
-  - `v11-b-test-v1`：`sha256:01efba8bb6701c3426a8d243a98dc8a4122e487c74cfa6a5a993f4bb1bce8f84`
-  - `v11-d-test-v1`：`sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e818`
-  - `v11-r-test-v1`：`sha256:c0bed53e26cc335f31e506b0198f2bb3d7659adce920ee2ff3a0b87dd87539ce`
-  - `v11-clean-test-v1`：`sha256:8325ad370a3232234823bf8de7ad804a99474ca90981fe06fbba3f56e82645cb`
+- Frozen benchmark（**v2 生效**）：
+  - `v11-b-test-v2`：`sha256:911defbff0b5d18d3b9091320bf556f3cf9a3af9ce103fb097d4df4aa60c6ecb`
+  - `v11-d-test-v2`：`sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018147`
+  - `v11-r-test-v2`：`sha256:983c48b649ce41c69a4ad382b1b18e6a557a8586dd967b5799a22421249924be`
+  - `v11-clean-test-v2`：`sha256:6a76a6986d680646d0a963cdca8105bd50f1f0930c3aa74eee01e191fead97ad`
+- 旧 benchmark：
+  - `v11-b-test-v1`（作废）：`sha256:01efba8bb6701c3426a8d243a98dc8a4122e487c74cfa6a5a993f4bb1bce8f84`
+  - `v11-d-test-v1`（作废）：`sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e818`
+  - `v11-r-test-v1`（作废）：`sha256:c0bed53e26cc335f31e506b0198f2bb3d7659adce920ee2ff3a0b87dd87539ce`
+  - `v11-clean-test-v1`（作废）：`sha256:8325ad370a3232234823bf8de7ad804a99474ca90981fe06fbba3f56e82645cb`
 - Known data issues:
   - 1–2 mm 没有真实开发病例；2–3 mm 仅 30 例
   - 9–10 mm 训练帧仅 9 帧（其中 5 帧在 dev）
@@ -43,21 +48,10 @@ benchmark: "sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e
 
 ## 3. Current baseline
 
-- Config: `input/configs/experiments/v11/baseline.yaml`
-- Official baseline: `20261030-152856_aff566e0_s20261020_d079ea`（tag `baseline`，`code_version=a2e8d50`）
-- Checkpoint: `output/runs/beta-regression/v11-baseline/20261030-152856_aff566e0_s20261020_d079ea/checkpoints/best.pt`
-- Val (best epoch 3): `v11/worst_bin=1.9191`、`v11/mae_lt10=1.4590`、`v11/mae=2.4359`、`v11/acc10=0.7220`
-- Test（best.pt，四个冻结 benchmark）：
-
-| cohort | MAE | mae_lt10 | worst_bin | acc10 |
-|---|---:|---:|---:|---:|
-| D | 3.1180 | 1.3610 | 2.4123 | 0.6854 |
-| B | 1.7616 | 1.6089 | 3.7027 | 0.9476 |
-| R | 2.6004 | 2.4400 | 2.9786 | 0.9514 |
-| clean | 2.3061 | 1.8165 | 3.1422 | 0.7670 |
-
-- 验收状态：四个 cohort 的 `worst_bin` 都 >2 mm，尚未达到成功标准。
-- 旧 exploratory run 及其 eval 已在 rerun 成功后删除；旧数字不与当前 `benchmark_id` 混用。
+- `single-v1` 的框错误（938 train / 6 val / 206 clean 使用整内容区），旧 v1 run 全部作废，只保留追溯。
+- `single-v2` 已修复并冻结；四个 v2 benchmark 已建立。
+- v2 正式 baseline：**尚未重跑**（当前状态 `phase: data`）。
+- Config: `input/configs/experiments/v11/baseline.yaml`（`single-v2` / `v11-d-test-v2`）
 - What is frozen vs still moving: 数据与 benchmark 已冻结；模型/损失仍可做 variant
 
 ## 4. Experiments
@@ -66,18 +60,20 @@ benchmark: "sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e
 
 | priority | hypothesis | change | success criterion | status | run |
 |---|---|---|---|---|---|
-| 1 | 骨干是否过度贴合训练病例 | A/B/C：ImageNet 全量 / 部分冻结 / 全冻结 | B/D 每档 <2 mm；baseline 为参照 | completed | 见 §4.2 |
+| 1 | 骨干是否过度贴合训练病例 | A/B/C：ImageNet 全量 / 部分冻结 / 全冻结 | B/D 每档 <2 mm；baseline 为参照 | v1 invalid; v2 pending | - |
 | 2 | 官方 RankSim 是否迁移有效 | `mm_rank` | 与 baseline 同口径对比 | planned | - |
 | 3 | 独立投影 RankSim | `model.proj=true` | 同上 | planned | - |
 
-### 4.2 Completed
+### 4.2 Archived v1 runs（invalid input）
+
+以下 run 是 `single-v1` 的结果，因整内容区框问题**不可用于结论**；保留只为追溯，v2 结果重跑后另列。
 
 | experiment | config | status | <primary metric> | run | note |
 |---|---|---|---|---|---|
-| baseline（official） | `v11/baseline.yaml` | completed | `v11/worst_bin=2.4123` (D) | `20261030-152856_aff566e0_s20261020_d079ea` | best.pt；B=3.7027 R=2.9786 clean=3.1422 |
-| backbone-full | `v11/backbone-full.yaml` | completed | `v11/worst_bin=2.7694` (D) | `20261030-154134_d7bc9e42_s20261020_8f28f6` | best.pt；B=4.0311 R=3.7489 clean=3.6066 |
-| backbone-partial | `v11/backbone-partial.yaml` | completed | `v11/worst_bin=2.7225` (D) | `20261030-160100_912c1962_s20261020_d8105c` | best.pt；B=3.4216 R=3.3639 clean=3.7600 |
-| backbone-frozen | `v11/backbone-frozen.yaml` | completed | `v11/worst_bin=2.1665` (D) | `20261030-161734_090ff394_s20261020_c040a7` | best.pt；B=4.4430 R=3.4163 clean=4.4550 |
+| baseline（v1） | `v11/baseline.yaml` | invalid | `v11/worst_bin=2.4123` (D) | `20261030-152856_aff566e0_s20261020_d079ea` | v1 框错误；不要引用 |
+| backbone-full（v1） | `v11/backbone-full.yaml` | invalid | `v11/worst_bin=2.7694` (D) | `20261030-154134_d7bc9e42_s20261020_8f28f6` | v1 框错误；不要引用 |
+| backbone-partial（v1） | `v11/backbone-partial.yaml` | invalid | `v11/worst_bin=2.7225` (D) | `20261030-160100_912c1962_s20261020_d8105c` | v1 框错误；不要引用 |
+| backbone-frozen（v1） | `v11/backbone-frozen.yaml` | invalid | `v11/worst_bin=2.1665` (D) | `20261030-161734_090ff394_s20261020_c040a7` | v1 框错误；不要引用 |
 
 ## 5. Open questions
 
@@ -86,23 +82,20 @@ benchmark: "sha256:6f6c3a3965f9cc4c9d260ed3bfd311e8bb23df9619aeab728b779afdb265e
 
 ## 6. Next actions
 
-- [x] 提交项目代码，消除 `code_version=no-git`
-- [x] 用 DLEF `937f11e` 重跑 baseline / full / partial / frozen，并保存 `best.pt`
-- [x] 用四个冻结 benchmark 评四个 run，评测绑定 `best.pt`
-- [x] 删除旧 run 和旧 eval
-- [ ] 依次跑 ranksim / proj 两个 variant
-- [ ] 为 baseline / backbone 结果创建 claim，并生成 report
-- [ ] review `make gc-dry`（注意 test access 已经很高）
+- [x] 修复 `single-v2` 框并建立四个 v2 benchmark
+- [ ] 用 v2 重跑全量训练 baseline（先不加 RankSim）
+- [ ] 在 v2 baseline 上跑 ranksim / proj 单变量对照
+- [ ] 汇总 v2 baseline / RankSim 的逐区间指标（含 0–2 mm）
+- [ ] 为 v2 结果创建 claim，并生成 report
+- [ ] review `make gc-dry`
 
 ## 7. Known issues / gotchas
 
 - GPU 上同时跑 PolypMeasure 训练时会 OOM；迁移期先 CPU 冒烟
 - 数据集移动过两次；引用路径统一走 `$DLEF_DATA_ROOT` 的相对路径
-- `mae_ge10` 在没有 ≥10 样本时是 NaN
-- 四个 cohort 的 `worst_bin` 都 >2 mm；当前还没有模型达到验收标准
-- test access 已累计多次（B/D/R/clean 多次）：report 会标 `WARN`，不要再为“刷新”重复评 test
-- `backbone-frozen-eval` 的 manifest 是 `a2e8d50-dirty`（rerun 期间工作区有
-  TensorBoard 文档改动）；训练 run 本身是干净的 `a2e8d50`
+- `mae_ge10` 在没有 ≥10 样本时是 NaN；空区间现在也显式写 NaN（无法评价）
+- v1 run 全部作废，不要与 v2 的 `benchmark_id` 混用
+- test access 会继续累计；report 会标 `WARN`，不要重复评 test 来“刷新”
 
 ## 8. Handoff checklist
 

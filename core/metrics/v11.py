@@ -18,12 +18,14 @@ def build_v11_metrics() -> Metric:
         values["mae_ge10"] = (preds[ge10] - targets[ge10]).abs().mean() if ge10.any() else targets.new_tensor(float("nan"))
         values["acc10"] = ((preds < 10) == lt10).float().mean()
         worst = None
-        for k in range(2, 10):
+        for k in range(0, 10):
             q = (targets >= k) & (targets < k + 1)
             if q.any():
                 m = (preds[q] - targets[q]).abs().mean()
                 values[f"mae_{k}_{k+1}"] = m
                 worst = m if worst is None else torch.maximum(worst, m)
+            else:
+                values[f"mae_{k}_{k+1}"] = targets.new_tensor(float("nan"))
         values["worst_bin"] = worst if worst is not None else targets.new_tensor(float("nan"))
         return values
 
