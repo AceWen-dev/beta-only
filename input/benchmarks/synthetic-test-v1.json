@@ -1,0 +1,17 @@
+{
+  "aggregation": "mean",
+  "benchmark_id": "sha256:647b946221bfee66ff26b0798fc9f509309828a898b992baa62c2a55c63f3abe",
+  "dataset": "regression",
+  "dataset_version": "synthetic",
+  "evaluator_version": "1",
+  "label_version": "v1",
+  "membership_digest": "holdout@0fc4583847e5e151/test",
+  "metrics": {
+    "mae": "v1"
+  },
+  "name": "synthetic-test-v1",
+  "split": "test",
+  "test_set_id": "sha256:e505e17ed9f245463443c1742f6857925385a0973e398b12ccfe45144d774c0a",
+  "thresholds": {},
+  "transform": "identity"
+}

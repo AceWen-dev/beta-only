@@ -1,0 +1,36 @@
+# PROJECT.yaml — stable project brief
+
+project: "beta-regression"
+question: "单张内镜图 + 检测框，能否把息肉直径测到毫米级，并让 <10 mm 每个 1 mm 区间 MAE 都 <2 mm？"
+unit: "case"
+input: "内镜 RGB（整图 + 1.25× 紧局部两视图）+ 冻结相对深度特征 + 10 维几何标量"
+output: "息肉直径（mm）与 10 mm 分级（<10 / ≥10）"
+primary_metric: "v11"
+success: "四个冻结测试集（B / D / R / 清洗公司）上，<10 mm 每个 1 mm 区间 MAE <2 mm；同时报 10 mm 一致率"
+non_goals:
+  - "不用活检钳"
+  - "不追实时"
+  - "不做视频流稳定化（另有 BetaImagingNet）"
+
+data:
+  root: "curated/v11_frames/single-v1"
+  name: "v11_frames"
+  version: "single-v1"
+  sample_id: "sample_id"
+  labels: "y"
+  units: "mm"
+
+splits:
+  train: "manifest split=train（按病例）"
+  val: "manifest split=val（按病例）"
+  test: "四项冻结 benchmark：B / D / R / 清洗公司"
+  group_by: "case_id"
+  test_frozen: true
+
+benchmark:
+  name: "v11-d-test-v1"
+  label_version: "single-v1"
+  metric_protocol: "mae per 1 mm bin; worst_bin = max over 2-9 mm; acc10 at 10 mm"
+
+created: "2026-10-30"
+dlef_commit: "937f11e"

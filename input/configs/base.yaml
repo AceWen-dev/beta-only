@@ -1,0 +1,76 @@
+# ---- run / training loop ----
+seed: 7
+epochs: 10
+max_steps: null
+project: beta-regression
+experiment: baseline
+log_every: 10
+checkpoint_every: 0
+
+early_stopping:
+  enabled: false
+  monitor: mae
+  mode: min
+  patience: 5
+  min_delta: 0.0
+  min_epochs: 0
+
+# Workspace path: where runs/artifacts/sweeps are written.
+# Relative paths resolve against the project root.
+output_root: output
+
+tensorboard:
+  enabled: true
+  subdir: tensorboard
+  flush_secs: 10
+
+# ---- data ----
+# Dataset bytes live outside this repo under $DLEF_DATA_ROOT.
+# Config selects logical names/versions, never absolute paths.
+data:
+  name: regression
+  version: synthetic
+  seed: 7
+  split: holdout
+  n_train: 512
+  n_val: 128
+  n_test: 128
+  noise: 0.1
+  batch_size: 32  # per-step batch size
+  train_transform: identity
+  eval_transform: identity
+
+benchmark:
+  name: synthetic-test-v1
+  label_version: v1
+  evaluator_version: "1"
+  aggregation: mean
+  metric_versions:
+    mae: v1
+  thresholds: {}
+
+model:
+  name: mlp
+  hidden: 16
+
+loss:
+  name: mse
+  huber_beta: 1.0
+
+optim:
+  name: adamw
+  lr: 0.01
+  weight_decay: 0.0
+  momentum: 0.0
+
+scheduler:
+  name: cosine
+  t_max: null
+  eta_min: 0.0
+
+metrics:
+  - mae
+
+amp: true
+grad_accum_steps: 2
+grad_clip: 1.0

@@ -1,0 +1,17 @@
+{
+  "aggregation": "mean",
+  "benchmark_id": "sha256:8325ad370a3232234823bf8de7ad804a99474ca90981fe06fbba3f56e82645cb",
+  "dataset": "v11_frames",
+  "dataset_version": "single-v1",
+  "evaluator_version": "1",
+  "label_version": "single-v1",
+  "membership_digest": "ea7b1b9a73384433",
+  "metrics": {
+    "v11": "v1"
+  },
+  "name": "v11-clean-test-v1",
+  "split": "test",
+  "test_set_id": "sha256:cdcb624f74aff7710fc84700bd48c456d012a41fc9978cdea952f22cd8bbbf19",
+  "thresholds": {},
+  "transform": "identity"
+}
