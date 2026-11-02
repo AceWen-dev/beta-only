@@ -1,0 +1,20 @@
+name: v11_frames
+version: single-v2
+manifest: curated/v11_frames/single-v2/manifest.json
+manifest_sha256: "6fe42f9cad1a1db04386c3ac1bfae643f692e7044108ebdf66160ef526f0762a"
+rows: 3206
+splits:
+  train: 2044
+  val: 205
+  test_b: 210
+  test_d: 356
+  test_r: 185
+  test_clean: 206
+sample_id: sample_id
+group_by: case_id
+label:
+  field: truth_mm
+  unit: mm
+provenance:
+  source: "PolypMeasure curated v11 frames"
+  created: "2026-10-30"
