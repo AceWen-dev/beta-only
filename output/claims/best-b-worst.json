@@ -1,0 +1,18 @@
+{
+  "claim_id": "best-b-worst",
+  "text": "v11 B 测试集 worst_bin MAE（3 seed 均值）",
+  "eval_ids": [
+    "20261103-001522_c0cef8b2_s20261020_48a9bc-test-68794c",
+    "20261103-001601_b6383d88_s20261021_616953-test-72651d",
+    "20261103-001640_cae55727_s20261022_06deab-test-2bfa7a"
+  ],
+  "metric": "v11/worst_bin",
+  "value": 2.708031415939331,
+  "unit": "mm",
+  "notes": "",
+  "tags": {
+    "experiment": "v11-ranksim-log-g20"
+  },
+  "created_at": "2026-11-02T16:17:04+00:00",
+  "benchmark_id": "sha256:911defbff0b5d18d3b9091320bf556f3cf9a3af9ce103fb097d4df4aa60c6ecb"
+}

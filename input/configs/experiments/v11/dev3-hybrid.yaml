@@ -1,0 +1,92 @@
+seed: 20261020
+epochs: 40
+max_steps: null
+project: beta-regression
+experiment: v11-dev3-hybrid
+log_every: 20
+checkpoint_every: 0
+ema_decay: 0.999
+
+early_stopping:
+  enabled: true
+  monitor: ema/v11/worst_bin
+  mode: min
+  patience: 20
+  min_delta: 0.0
+  min_epochs: 40
+  smooth_window: 3
+
+output_root: output
+tensorboard:
+  enabled: true
+  subdir: tensorboard
+  flush_secs: 10
+
+data:
+  name: v11_frames
+  version: single-v2
+  seed: 7
+  split: manifest
+  n_train: 1
+  n_val: 1
+  n_test: 1
+  noise: 0.0
+  batch_size: 16
+  train_transform: identity
+  eval_transform: identity
+  views: 2
+  test_set: d
+  max_samples: 0
+  sampler: shuffle
+  dev_folds: 3
+  dev_fold: 0
+
+benchmark:
+  name: v11-d-test-v2
+  label_version: single-v1
+  evaluator_version: "1"
+  aggregation: mean
+  metric_versions:
+    v11: v2
+  thresholds: {}
+
+model:
+  name: v11
+  hidden: 16
+  views: 2
+  d_model: 64
+  heads: 4
+  init_checkpoint: ""
+  proj: false
+  beta_ref: 0.07543606728391815
+  truth_median: 5.0
+  k_bound: 2.06
+
+loss:
+  relative: false
+  hybrid_rel_weight: 0.25
+  hybrid_rel_scale: 5.0
+  name: mm_case_bin
+  huber_beta: 1.0
+  delta: 1.0
+  rank_gamma: 1.0
+  rank_interp: 1.0
+
+optim:
+  name: v11_adamw
+  lr: 0.0002
+  lr_backbone: 0.00002
+  weight_decay: 0.0001
+  momentum: 0.0
+
+scheduler:
+  name: cosine
+  t_max: null
+  eta_min: 0.0
+  warmup_epochs: 3
+
+metrics:
+  - v11
+amp: false
+grad_accum_steps: 1
+grad_clip: 1.0

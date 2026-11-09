@@ -7,12 +7,12 @@ input/configs/
   base.yaml                         # synthetic smoke only; not the default
   experiments/
     v11/
-      baseline.yaml                 # project default: mm_case_bin
-      ranksim.yaml                  # mm_rank
-      proj.yaml                     # independent projection + RankSim
-      backbone-full.yaml
-      backbone-partial.yaml
-      backbone-frozen.yaml
+      baseline-best.yaml          # project default: mm_case_bin + best
+      ranksim-best.yaml             # mm_rank + best
+      proj-best.yaml              # projection + mm_rank + best
+      backbone-full-best.yaml
+      backbone-partial-best.yaml
+      backbone-frozen-best.yaml
   sweeps/
     <sweep>.yaml                    # parameter space, optional
 ```
@@ -22,7 +22,7 @@ Rules:
 - `base.yaml` is a synthetic 1-D regression smoke config. It is useful for
   checking the framework wiring, not for reporting project results.
 - `make train`, `make check`, `make audit` and `make sweep` default to
-  `input/configs/experiments/v11/baseline.yaml`; override with `CONFIG=...`.
+  `input/configs/experiments/v11/baseline-best.yaml`; override with `CONFIG=...`.
 - A seed is a run dimension. Do not create `seed1.yaml`, `seed2.yaml`, ...
 - A sweep describes a parameter space; generated per-trial configs belong under
   `output/sweeps/<sweep_id>/configs/`, not in the repo.

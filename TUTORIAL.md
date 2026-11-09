@@ -59,7 +59,7 @@ make inspect RUN=<run_id>
 当前项目默认配置是：
 
 ```text
-input/configs/experiments/v11/baseline.yaml
+input/configs/experiments/v11/baseline-best.yaml
 ```
 
 `input/configs/base.yaml` 只是 synthetic smoke，不是项目 baseline。
@@ -113,7 +113,7 @@ make check
 make train
 # 等价于：
 python core/commands/train.py \
-  --config input/configs/experiments/v11/baseline.yaml \
+  --config input/configs/experiments/v11/baseline-best.yaml \
   --tag baseline
 ```
 
@@ -183,19 +183,19 @@ clean --benchmark input/benchmarks/v11-clean-test-v2.json --set data.test_set=cl
 已有配置：
 
 ```text
-input/configs/experiments/v11/baseline.yaml
-input/configs/experiments/v11/ranksim.yaml
-input/configs/experiments/v11/proj.yaml
-input/configs/experiments/v11/backbone-full.yaml
-input/configs/experiments/v11/backbone-partial.yaml
-input/configs/experiments/v11/backbone-frozen.yaml
+input/configs/experiments/v11/baseline-best.yaml
+input/configs/experiments/v11/ranksim-best.yaml
+input/configs/experiments/v11/proj-best.yaml
+input/configs/experiments/v11/backbone-full-best.yaml
+input/configs/experiments/v11/backbone-partial-best.yaml
+input/configs/experiments/v11/backbone-frozen-best.yaml
 ```
 
 单独跑一个 variant：
 
 ```bash
-make train CONFIG=input/configs/experiments/v11/ranksim.yaml
-make check CONFIG=input/configs/experiments/v11/ranksim.yaml
+make train CONFIG=input/configs/experiments/v11/ranksim-best.yaml
+make check CONFIG=input/configs/experiments/v11/ranksim-best.yaml
 ```
 
 新建 variant：

@@ -1,5 +1,5 @@
 PYTHON ?= python
-CONFIG ?= input/configs/experiments/v11/baseline.yaml
+CONFIG ?= input/configs/experiments/v11/baseline-best.yaml
 OUTPUT ?= $(if $(DLEF_OUTPUT_ROOT),$(DLEF_OUTPUT_ROOT),output)
 EXPERIMENT ?= v11
 GC_METRIC ?= v11/worst_bin
@@ -21,6 +21,13 @@ inspect:
 
 runs:
 	$(PYTHON) core/tools/runs.py --runs $(OUTPUT)/runs
+
+tb-sync:
+	$(PYTHON) scripts/sync_tb_links.py
+
+chart:
+	@test -n "$(RUN)" || (echo "usage: make chart RUN=<run_dir> [CHECKPOINTS=best.pt,last.pt]"; exit 2)
+	$(PYTHON) scripts/plot_experiment.py --run $(RUN) --checkpoints $(or $(CHECKPOINTS),best.pt,best_ema.pt,last.pt)
 
 runs-all:
 	$(PYTHON) core/tools/runs.py --runs $(OUTPUT)/runs --all
@@ -56,13 +63,13 @@ gc-dry:
 
 check:
 	$(PYTHON) core/tools/check.py --project PROJECT.yaml --config $(CONFIG)
-	$(PYTHON) -m unittest discover -s core/tests -v
+	$(PYTHON) -m unittest discover -s tests -v
 
 audit:
 	$(PYTHON) core/tools/audit_data.py --config $(CONFIG) --project PROJECT.yaml
 
 test:
-	$(PYTHON) -m unittest discover -s core/tests -v
+	$(PYTHON) -m unittest discover -s tests -v
 
 doctor:
 	$(PYTHON) -m dlef.cli doctor

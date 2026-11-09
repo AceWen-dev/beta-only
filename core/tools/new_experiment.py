@@ -50,7 +50,7 @@ def main() -> int:
         "--from",
         dest="source",
         default=str(
-            ROOT / "input" / "configs" / "experiments" / "v11" / "baseline.yaml"
+            ROOT / "input" / "configs" / "experiments" / "v11" / "baseline-best.yaml"
         ),
         help="base config to copy",
     )

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -28,6 +29,7 @@ from core.runtime import (  # noqa: E402
     write_trial_result,
 )
 from core.task import build_task  # noqa: E402
+from core.tensorboard import write_eval_scalars  # noqa: E402
 
 
 def _parse_tags(items: list[str]) -> dict[str, str]:
@@ -104,6 +106,15 @@ def main() -> int:
         EvalSpec(checkpoint=str(checkpoint), split="val"),
         run,
     )
+    if config.schema.tensorboard.enabled and record.metrics:
+        # 训练结束的最终验证评估也进 TensorBoard（eval/val/final/<metric>）
+        write_eval_scalars(
+            run.directory,
+            record.metrics,
+            prefix="eval/val/final",
+            subdir=config.schema.tensorboard.subdir,
+            flush_secs=config.schema.tensorboard.flush_secs,
+        )
     write_trial_result(run, record.metrics)
     print(f"run: {run.run_id}")
     print(f"metrics: {record.metrics}")
@@ -111,6 +122,22 @@ def main() -> int:
     print(f"checkpoint: {run.checkpoint_path}")
     if best_checkpoint.is_file():
         print(f"best checkpoint: {best_checkpoint}")
+
+    # 训练结束自动产出 TensorBoard 数据与逐区间图（D-0036）：
+    #  1) output/tb 符号链接同步（TB 才能看到新 run）
+    #  2) eval 模式评测 B/D/R/clean + 出图 + 写 benchmark 标量与图片
+    # 冒烟 run（max_steps / max_samples）跳过；可用 DLEF_SKIP_POST_REPORT=1 关闭。
+    smoke = config.schema.max_steps is not None or config.schema.data.max_samples > 0
+    if not smoke and os.environ.get("DLEF_SKIP_POST_REPORT") != "1":
+        for cmd in (
+            [sys.executable, str(ROOT / "scripts/sync_tb_links.py")],
+            [sys.executable, str(ROOT / "scripts/plot_experiment.py"), "--run", str(run.directory)],
+        ):
+            try:
+                subprocess.run(cmd, cwd=ROOT, check=False,
+                               env=dict(os.environ, DLEF_DATA_ROOT=os.environ.get("DLEF_DATA_ROOT", "")))
+            except Exception as exc:  # noqa: BLE001 - 报告失败不应让训练失败
+                print(f"post-training report skipped: {exc!r}")
     return 0
 
 

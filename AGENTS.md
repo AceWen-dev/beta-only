@@ -33,7 +33,7 @@ it is not vendored here. Read this file before editing.
 5. `README.md` and `TUTORIAL.md` — overview and operational runbook.
 6. `core/config.py` — typed schema and selectors.
 7. `core/task.py` — composition root.
-8. `input/configs/experiments/v11/baseline.yaml` and `input/benchmarks/`.
+8. `input/configs/experiments/v11/baseline-best.yaml` and `input/benchmarks/`.
 9. Open only the component files the task actually changes.
 
 **First response = plan, not code.** For non-trivial changes, state the task, the
@@ -50,7 +50,7 @@ the 1–2 step smoke test. Do not write code until the plan is confirmed.
   `v11/mae_lt10` and `v11/acc10` are reported alongside.
 - Frozen tests: `v11-b-test-v2`, `v11-d-test-v2`, `v11-r-test-v2`,
   `v11-clean-test-v2`; the default development benchmark is `v11-d-test-v2`.
-- Default experiment config: `input/configs/experiments/v11/baseline.yaml`.
+- Default experiment config: `input/configs/experiments/v11/baseline-best.yaml`.
 - `input/configs/base.yaml` is the synthetic smoke config only. `make train`,
   `make audit` and `make check` default to the v11 baseline.
 - Data counts, current run/eval ids and benchmark hashes live in `STATE.md`; do
@@ -70,7 +70,7 @@ Daily commands:
 
 ```bash
 make status        # phase, runs, next actions, git
-make test          # unittest discovery over core/tests
+make test          # unittest discovery over tests
 make audit         # data/split/label/leakage first pass
 make check         # brief + config + benchmark + phase gate + full tests
 make configs       # validate every config in input/configs
@@ -80,8 +80,8 @@ make handoff
 ```
 
 - The suite is **unittest**, not pytest. Run one module with:
-  `python -m unittest core.tests.test_v11_smoke -v`.
-- `core/tests/test_project_memory.py` checks that this file names
+  `python -m unittest tests.test_v11_smoke -v`.
+- `tests/test_project_memory.py` checks that this file names
   `PROJECT.yaml`, `STATE.md`, `DECISIONS.md` and keeps the `Reading order` /
   `0.2` headings; preserve them when editing.
 - v11 tests need `torch` and `DLEF_DATA_ROOT` pointing at the manifest; install
@@ -98,7 +98,7 @@ attach `--tag baseline`:
 
 ```bash
 python core/commands/train.py \
-  --config input/configs/experiments/v11/baseline.yaml \
+  --config input/configs/experiments/v11/baseline-best.yaml \
   --tag baseline
 ```
 
@@ -132,7 +132,10 @@ python core/commands/eval.py \
 When early stopping is enabled, `train.py` writes `checkpoints/best.pt` at the
 best validation epoch and loads it for its final val eval. `last.pt` is the
 final epoch and remains the resume checkpoint; use `best.pt` for reported test
-evals.
+evals. `best.pt` always holds **raw** weights selected on the raw monitor metric
+(`ema/` prefix stripped). When EMA is enabled and the monitor is `ema/...`, the
+runner also writes `checkpoints/best_ema.pt` (EMA weights selected on the
+`ema/...` metric); evaluate both when EMA selection is under test.
 
 Use `--set KEY=VALUE` on `train.py`/`eval.py` for typed one-off overrides, e.g.
 `--set model.name=linear --set loss.name=huber --set data.max_samples=8`.
@@ -153,7 +156,9 @@ core/losses/            mm_case_bin, mm_rank, mse, huber
 core/optimizers/        v11_adamw (backbone/head LRs), adamw, adam, sgd
 core/metrics/v11.py     per-bin MAE, worst_bin, acc10
 core/commands/          train.py, eval.py, sweep.py only
-core/tools/             generic maintenance; scripts/ is project-specific
+core/tools/                  generic maintenance
+tests/                  project tests
+scripts/                project-specific automation
 input/configs/          one file per experiment variant
 input/benchmarks/       four immutable frozen manifests
 output/                 generated evidence only
@@ -224,7 +229,7 @@ output/                 generated evidence only
 
   ```bash
   python core/tools/benchmark.py create \
-    --config input/configs/experiments/v11/baseline.yaml \
+    --config input/configs/experiments/v11/baseline-best.yaml \
     --out input/benchmarks/v11-b-test-v2.json \
     --set data.test_set=b --set benchmark.name=v11-b-test-v2
   ```
@@ -255,6 +260,16 @@ output/                 generated evidence only
   and protocol. Do not bypass that check.
 - Test access is recorded under `output/test_access/`; a repeated access to the
   same test set produces a `WARN` in the report.
+- TensorBoard runs on `--logdir output/tb` (symlinks to each run's `tensorboard/`).
+  `train.py` now does both steps automatically when a real run finishes: it syncs the
+  symlink (`scripts/sync_tb_links.py`) and generates the per-bin chart plus
+  `benchmark/` scalars and the chart image (`scripts/plot_experiment.py`). Smoke runs
+  (`max_steps`/`max_samples`) skip this; set `DLEF_SKIP_POST_REPORT=1` to disable.
+- Every finished training run must get its per-bin chart: `make chart RUN=<run_dir>`
+  (also `--checkpoints`). It measures in eval mode, draws **only that experiment's
+  own checkpoints** against the 2 mm line with dataset-labelled panels and the
+  `<10mm` total MAE in each panel's corner, and writes `output/charts/<experiment>.png`,
+  a copy under the run directory, and `output/reports/<experiment>_evalmode.json`.
 - A `Claim` must reference at least one eval id and pin its `benchmark_id`.
   Reports are generated from claims; never hand-copy numbers:
 

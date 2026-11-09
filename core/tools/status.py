@@ -75,7 +75,7 @@ def _output_root() -> Path:
         root = Path(env).expanduser()
         return root if root.is_absolute() else ROOT / root
     base = _read_yaml(
-        ROOT / "input" / "configs" / "experiments" / "v11" / "baseline.yaml"
+        ROOT / "input" / "configs" / "experiments" / "v11" / "baseline-best.yaml"
     )
     value = str(base.get("output_root", "output"))
     root = Path(value).expanduser()

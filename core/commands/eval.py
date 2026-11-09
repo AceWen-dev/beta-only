@@ -35,6 +35,7 @@ from core.runtime import (  # noqa: E402
     resolve_output_root,
 )
 from core.task import build_task  # noqa: E402
+from core.tensorboard import write_benchmark_scalars, write_eval_scalars  # noqa: E402
 
 
 def main() -> int:
@@ -171,6 +172,37 @@ def main() -> int:
             ),
             run,
         )
+        if config.schema.tensorboard.enabled and record.metrics:
+            # 评估指标进 TensorBoard（D-0029/D-0030）：
+            #   测试 → benchmark/<cohort>/mae_by_bin 逐档曲线 + summary 单点；
+            #   验证 → eval/val/final/<metric> 单点。
+            if args.split == "test":
+                cohort = benchmark_name
+                for src, tag in (
+                    ("v11-b-test-v2", "B"), ("v11-d-test-v2", "D"),
+                    ("v11-r-test-v2", "R"), ("v11-clean-test-v2", "clean"),
+                ):
+                    if src in (benchmark_name or ""):
+                        cohort = tag
+                        break
+                ck_name = Path(checkpoint).stem  # best / final_ema / last
+                for target in (run.directory, Path(checkpoint).parent.parent):
+                    write_benchmark_scalars(
+                        target,
+                        record.metrics,
+                        cohort=cohort,
+                        checkpoint=ck_name,
+                        subdir=config.schema.tensorboard.subdir,
+                        flush_secs=config.schema.tensorboard.flush_secs,
+                    )
+            else:
+                write_eval_scalars(
+                    run.directory,
+                    record.metrics,
+                    prefix="eval/val/final",
+                    subdir=config.schema.tensorboard.subdir,
+                    flush_secs=config.schema.tensorboard.flush_secs,
+                )
         run.finalize("completed")
     except BaseException as exc:  # noqa: BLE001
         run.finalize("failed", error=repr(exc))

@@ -10,6 +10,7 @@ from typing import Any, Mapping
 import yaml
 
 from adapters.torch import TorchCheckpointCodec, TorchTrainingPolicy
+from adapters.torch.ema import ModelEMA
 from dlef.run import ArtifactStore, Run, RunStore
 from dlef.runner import Runner
 from dlef.sweep import TrialResult
@@ -60,6 +61,7 @@ def build_runner(outputs: str | Path, policy: TorchTrainingPolicy) -> Runner:
         artifact_store,
         checkpoint_codec=TorchCheckpointCodec(),
         training_policy=policy,
+        ema_factory=ModelEMA,
     )
 
 

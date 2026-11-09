@@ -1,0 +1,18 @@
+{
+  "claim_id": "best-d-lt10",
+  "text": "v11 D 测试集 <10mm MAE（3 seed 均值）",
+  "eval_ids": [
+    "20261103-001509_a6508918_s20261020_3654d7-test-293dce",
+    "20261103-001548_01b10971_s20261021_27cff7-test-1e0181",
+    "20261103-001628_63b3038c_s20261022_52c392-test-8ad01b"
+  ],
+  "metric": "v11/mae_lt10",
+  "value": 1.111433744430542,
+  "unit": "mm",
+  "notes": "配方 log+RankSim(γ=2.0)+valmerge+EMA；seeds=['20261020', '20261021', '20261022']",
+  "tags": {
+    "experiment": "v11-ranksim-log-g20"
+  },
+  "created_at": "2026-11-02T16:17:04+00:00",
+  "benchmark_id": "sha256:2c4d4beeb9461597c2cae52cfaa82f0a8947d433882b1cd3b169994205018147"
+}

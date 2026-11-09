@@ -1,0 +1,86 @@
+seed: 20261020
+epochs: 15
+max_steps: null
+project: beta-regression
+experiment: v11-company-base448
+log_every: 20
+checkpoint_every: 5
+ema_decay: 0.999
+early_stopping:
+  enabled: true
+  monitor: ema/v11/robust_worst_bin
+  mode: min
+  patience: 8
+  min_delta: 0.0
+  min_epochs: 15
+  smooth_window: 3
+output_root: output
+tensorboard:
+  enabled: true
+  subdir: tensorboard
+  flush_secs: 10
+data:
+  name: v11_frames
+  version: company-v1
+  seed: 7
+  split: manifest
+  n_train: 1
+  n_val: 1
+  n_test: 1
+  noise: 0.0
+  batch_size: 4
+  train_transform: identity
+  eval_transform: identity448
+  views: 2
+  input_size: 448
+  test_set: company
+  max_samples: 0
+  sampler: shuffle
+  dev_folds: 0
+  dev_fold: 0
+  num_workers: 4
+  pin_memory: true
+benchmark:
+  name: v11-company-test-v1-448
+  label_version: single-v1
+  evaluator_version: '1'
+  aggregation: mean
+  metric_versions:
+    v11: v2
+  thresholds: {}
+model:
+  name: v11
+  hidden: 16
+  views: 2
+  d_model: 64
+  heads: 4
+  init_checkpoint: ''
+  proj: false
+  spatial_context: false
+  beta_ref: 0.016903
+  truth_median: 5.0
+  k_bound: 2.06
+loss:
+  log_space: true
+  log_beta: 0.1
+  name: mm_rank
+  huber_beta: 1.0
+  delta: 1.0
+  rank_gamma: 2.0
+  rank_interp: 1.0
+optim:
+  name: v11_adamw
+  lr: 0.0002
+  lr_backbone: 2.0e-05
+  weight_decay: 0.0001
+  momentum: 0.0
+scheduler:
+  name: cosine
+  t_max: null
+  eta_min: 0.0
+  warmup_epochs: 3
+metrics:
+- v11
+amp: false
+grad_accum_steps: 4
+grad_clip: 1.0

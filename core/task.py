@@ -6,6 +6,8 @@ in their own packages; this file only composes them into a TorchTask.
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from typing import Any
 
 from adapters.torch import TorchTask
@@ -20,6 +22,8 @@ from .optimizers import build_optimizer
 from .schedulers import build_scheduler
 from .metrics import build_metrics
 from .tensorboard import TensorBoardCallback
+
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 
 
 def build_task(config: ProjectConfig, device: Any = "cpu") -> TorchTask:
@@ -40,6 +44,7 @@ def build_task(config: ProjectConfig, device: Any = "cpu") -> TorchTask:
             TensorBoardCallback(
                 subdir=config.tensorboard.subdir,
                 flush_secs=config.tensorboard.flush_secs,
+                tb_root=PROJECT_ROOT / "output" / "tb",
             )
         )
 

@@ -15,8 +15,14 @@ runtime.py    # policy / runner / output-root wiring
 tensorboard.py # optional TensorBoard mirror callback
 commands/     # train / eval / sweep (core entries only)
 tools/        # generic maintenance utilities
-tests/        # tests for this project
 ```
 
-Reusable logic lives here; the sibling `scripts/` directory stays thin. If code
-is reusable across projects, move it to DLEF core/adapters instead.
+Project-root siblings:
+
+```text
+tests/        # project tests
+scripts/      # project-specific automation
+```
+
+Reusable logic lives here; `scripts/` and `tools/` stay thin. If code is
+reusable across projects, move it to DLEF core/adapters instead.

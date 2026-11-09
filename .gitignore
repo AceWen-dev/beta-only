@@ -8,6 +8,10 @@ __pycache__/
 /output/sweeps/
 /output/test_access/
 /output/reports/
+/output/review/
+/output/logs/
+/output/tb/
+/output/tmp_diag.txt
 
 # Dataset bytes live outside the repo; see core/data/paths.py.
 # Anchored at the project root so core/data/ (code) is not ignored.

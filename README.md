@@ -73,7 +73,7 @@ core/
   runtime.py                        # policy / runner / output-root wiring
   commands/train.py, eval.py, sweep.py
   tools/                            # generic maintenance utilities
-  tests/                            # v11 contract, smoke, benchmark tests
+tests/                              # project tests
 scripts/                            # project-specific scripts, intentionally free-form
 output/
   runs/ artifacts/ sweeps/ test_access/ claims/ reports/
@@ -108,7 +108,7 @@ make test          # unit tests; v11 tests need torch + DLEF_DATA_ROOT
 make audit         # data/split/leakage first pass on the default config
 make check         # brief + config + benchmark + phase gate + tests
 
-make train         # v11 baseline from input/configs/experiments/v11/baseline.yaml
+make train         # v11 baseline from input/configs/experiments/v11/baseline-best.yaml
 make runs          # experiment summary
 make status        # phase / runs / next actions / git
 ```
@@ -120,8 +120,8 @@ synthetic 1-step smoke config and is not the default for `train`, `check` or
 Override the config for any command:
 
 ```bash
-make train CONFIG=input/configs/experiments/v11/ranksim.yaml
-make check CONFIG=input/configs/experiments/v11/ranksim.yaml
+make train CONFIG=input/configs/experiments/v11/ranksim-best.yaml
+make check CONFIG=input/configs/experiments/v11/ranksim-best.yaml
 ```
 
 ## Train / eval
@@ -130,7 +130,7 @@ Train and tag a run:
 
 ```bash
 python core/commands/train.py \
-  --config input/configs/experiments/v11/baseline.yaml \
+  --config input/configs/experiments/v11/baseline-best.yaml \
   --tag baseline
 ```
 
@@ -160,19 +160,18 @@ One config file per experiment variant, not per run or seed:
 
 ```text
 input/configs/experiments/v11/
-  baseline.yaml          # mm_case_bin, full backbone
-  ranksim.yaml           # mm_rank
-  proj.yaml              # independent projection + RankSim
-  backbone-full.yaml
-  backbone-partial.yaml
-  backbone-frozen.yaml
+  baseline-best.yaml              # mm_case_bin + best recipe (40 epochs)
+  ranksim-best.yaml               # mm_rank + best recipe (80 epochs)
+  proj-best.yaml                  # projection + mm_rank + best recipe (40 epochs)
+  backbone-full-best.yaml         # 40 epochs (not queued; same as baseline)
+  backbone-partial-best.yaml      # 40 epochs
+  backbone-frozen-best.yaml       # 40 epochs
 ```
 
-`ranksim.yaml` and `proj.yaml` set `model.init_checkpoint: ""` so their
-backbone starts from torchvision `ResNet50_Weights.IMAGENET1K_V1`. A non-empty
-`init_checkpoint` loads a project checkpoint after that; `baseline.yaml` still
-uses the v10 checkpoint, so RankSim-vs-baseline is not a strict single-variable
-initialization comparison.
+All current v11 configs use the best recipe: 3-epoch warmup, EMA 0.999,
+case-bin sampler and `model.init_checkpoint: ""` (ImageNet). `ranksim-best`
+runs 80 epochs as the reference run; the comparison arms run 40 epochs (D-0014).
+Old short/`long80` experiments were removed with the old strategy.
 
 A seed is a run dimension. Do not create `seed1.yaml`, `seed2.yaml`. Generated
 sweep trial configs belong under `output/sweeps/<sweep_id>/configs/`, not in

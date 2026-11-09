@@ -1,0 +1,22 @@
+{
+  "name": "benchmark2",
+  "description": "公司数据换成 company-v1 新划分测试集；PolypSize B 与 REAL-colon R 保持原队列；R 自 2026-11-05 起排除 1–2mm（min_truth_mm=2.0）；B 自 2026-11-06 起把 7–8mm 当单例离群、排除该档（exclude_bins=[7]）；冻结基准不变",
+  "members": {
+    "company": {
+      "version": "company-v1",
+      "split": "test_company"
+    },
+    "b": {
+      "version": "single-v2",
+      "split": "test_b",
+      "exclude_bins": [
+        7
+      ]
+    },
+    "r": {
+      "version": "single-v2",
+      "split": "test_r",
+      "min_truth_mm": 2.0
+    }
+  }
+}

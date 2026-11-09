@@ -1,0 +1,22 @@
+{
+  "name": "benchmark2-big",
+  "description": "benchmark2 的 company 队列换成 company-v1-big（训练集补充 10–15mm；test 划分不变）；R 排除 1–2mm、B 排除 7–8mm",
+  "members": {
+    "company": {
+      "version": "company-v1-big",
+      "split": "test_company"
+    },
+    "b": {
+      "version": "single-v2",
+      "split": "test_b",
+      "exclude_bins": [
+        7
+      ]
+    },
+    "r": {
+      "version": "single-v2",
+      "split": "test_r",
+      "min_truth_mm": 2.0
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "name": "benchmark2-endo",
+  "description": "同 benchmark2，但 B/R 使用 EndoStreamDepth 特征（b-r-endo），供 Endo 深度训练的模型使用；R 排除 1–2mm、B 排除 7–8mm",
+  "members": {
+    "company": {
+      "version": "company-v1-endo",
+      "split": "test_company"
+    },
+    "b": {
+      "version": "b-r-endo",
+      "split": "test_b",
+      "exclude_bins": [
+        7
+      ]
+    },
+    "r": {
+      "version": "b-r-endo",
+      "split": "test_r",
+      "min_truth_mm": 2.0
+    }
+  }
+}

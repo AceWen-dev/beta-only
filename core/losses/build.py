@@ -6,6 +6,7 @@ from adapters.torch import TorchLoss
 from ..config import LossConfig
 from .huber import build_huber
 from .mm_case_bin import build_mm_case_bin
+from .mm_ordinal import build_mm_ordinal
 from .mm_rank import build_mm_rank
 from .mse import build_mse
 
@@ -14,6 +15,7 @@ BUILDERS: dict[str, Callable[[LossConfig], TorchLoss]] = {
     "huber": build_huber,
     "mm_case_bin": build_mm_case_bin,
     "mm_rank": build_mm_rank,
+    "mm_ordinal": build_mm_ordinal,
 }
 
 

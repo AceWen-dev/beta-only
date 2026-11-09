@@ -184,7 +184,7 @@ def main() -> int:
     parser.add_argument(
         "--config",
         default=str(
-            ROOT / "input" / "configs" / "experiments" / "v11" / "baseline.yaml"
+            ROOT / "input" / "configs" / "experiments" / "v11" / "baseline-best.yaml"
         ),
     )
     parser.add_argument("--project", default=str(ROOT / "PROJECT.yaml"))

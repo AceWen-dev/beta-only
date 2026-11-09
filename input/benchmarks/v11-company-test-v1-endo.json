@@ -1,0 +1,17 @@
+{
+  "aggregation": "mean",
+  "benchmark_id": "sha256:d3ddb23261b19776033aa60c10faf1c8b322369f78b33538e061580cf329dfe5",
+  "dataset": "v11_frames",
+  "dataset_version": "company-v1-endo",
+  "evaluator_version": "1",
+  "label_version": "single-v1",
+  "membership_digest": "0dae570009236a88",
+  "metrics": {
+    "v11": "v2"
+  },
+  "name": "v11-company-test-v1-endo",
+  "split": "test",
+  "test_set_id": "sha256:e2098e62d43cdc888d9f5a08e21521d6a02a2eb2af40b1e3dec33f3434b98094",
+  "thresholds": {},
+  "transform": "identity"
+}
